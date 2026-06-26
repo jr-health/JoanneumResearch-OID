@@ -1,0 +1,130 @@
+= OID-Konzept - AW: PräNUDGE FHIR-IG Review und ELGA Terminologie Einschulung
+
+*Von:* fhir@tanjga.eu +
+*Gesendet:* Freitag, 26. Juni 2026 11:01 +
+*An:* Truskaller, Thomas; fhir@tanjga.eu; Weitlaner, Theresa; Stampfer, Philip +
+*Betreff:* OID-Konzept - AW: PräNUDGE FHIR-IG Review und ELGA Terminologie Einschulung
+
+Hallo allesamt!
+
+Um für die joanneum-research oid „2.16.840.1.113883.2.16.3.1.21" ein eigenes OID‑Konzept aufzubauen, orientiert man sich primär an den österreichischen OID‑Leitfaden. [link:https://www.elga.gv.at/fileadmin/user_upload/Dokumente_PDF_MP4/CDA/OID-Leitfaden_1-0-0.pdf[elga.gv]]
+
+'''
+
+== Einordnung der OID
+
+* Der Knoten 2.16.840.1.113883 ist der Root von HL7 International; er repräsentiert HL7 als Organisation im globalen OID‑Baum.[link:https://oid-base.com/get/2.16.840.1.113883[oid-base]]
+* Unter 2.16.840.1.113883.2.16 liegt HL7 Austria; HL7 Austria vergibt u. a. OIDs für österreichische Organisationen im Gesundheitswesen.[link:https://hl7.at/oid-vergabe-durch-hl7-austria/[hl7]]
+* Laut HL7 Austria werden *Organisationen* unterhalb von 2.16.840.1.113883.2.16.3.1.x adressiert; deine OID 2.16.840.1.113883.2.16.3.1.21 ist also der Root‑Namespace für JOANNEUM RESEARCH als Organisation.[link:https://hl7.at/oid-vergabe-durch-hl7-austria/[hl7]]
+
+
+Damit erhält man einen eigenen Unterbaum, den man intern verwalten darf, solange man die allgemeinen Regeln aus dem OID‑Leitfaden einhaltet (Subsidiarität, Eindeutigkeit, Metadatenpflege etc.).[link:https://www.elga.gv.at/fileadmin/user_upload/Dokumente_PDF_MP4/CDA/OID-Leitfaden_1-0-0.pdf[elga.gv]]
+
+'''
+
+== Grundprinzipien für das JR‑OID‑Konzept
+
+* *Objekttypen sauber trennen:* Der österreichische Leitfaden unterscheidet u. a. Instanz‑Identifier, Identifikationsmechanismen, Codeschemata, Services, Dokumente/Richtlinien, Templates und experimentelle Objekte.[link:https://www.elga.gv.at/fileadmin/user_upload/Dokumente_PDF_MP4/CDA/OID-Leitfaden_1-0-0.pdf[elga.gv]]
+* *OID sind Verwaltungsstruktur, nicht Semantik:* Der Baum ist laut Leitfaden rein organisatorisch; technisch darf aus Teilstücken der OID keine Semantik „herausgeparst" werden – Bedeutung kommt über Metadaten im OID‑Repository.[link:https://www.elga.gv.at/fileadmin/user_upload/Dokumente_PDF_MP4/CDA/OID-Leitfaden_1-0-0.pdf[elga.gv]]
+* *Blattknoten für Adressräume/Codes:* Für Identifikationsmechanismen und Kodierschemata sollen OIDs als Blattknoten vergeben werden; die eigentliche ID oder der Code steckt dann im „Suffix" (Extension) innerhalb dieses Namespace.[link:https://www.elga.gv.at/fileadmin/user_upload/Dokumente_PDF_MP4/CDA/OID-Leitfaden_1-0-0.pdf[elga.gv]]
+* *Keine Weiterdelegation nach außen:* Im österreichischen eHealth‑Kontext darf die Registrierungsbefugnis offiziell nur von der Stammregistrierungsstelle (EHSREG) weitergegeben werden; innerhalb eures eigenen Organisations‑Oid könnt man aber eure interne Struktur definieren, ohne selbst weitere externe Roots zu vergeben.[link:https://www.elga.gv.at/fileadmin/user_upload/Dokumente_PDF_MP4/CDA/OID-Leitfaden_1-0-0.pdf[elga.gv]]
+
+Diese Prinzipien kannst man praktisch 1:1 auf den Unterbaum 2.16.840.1.113883.2.16.3.1.21 übertragen.
+
+'''
+
+== Vorschlag für Hauptzweige unter 2.16.840.1.113883.2.16.3.1.21
+
+Eine mögliche, klar lesbare Struktur (Bezeichnungen sind Beispiele):
+
+[%autowidth,cols="1,2"]
+|===
+| *OID‑Muster* | *Bezeichnungen / Inhalt / Zweck*
+
+| 2.16.840.1.113883.2.16.3.1.21.1.x
+| Instanz‑Identifier‑Namespaces (Patienten‑IDs, Fall‑IDs, Studien‑IDs etc.)
+
+| 2.16.840.1.113883.2.16.3.1.21.2.x
+| Identifikationsmechanismen (z. B. verschiedene Nummernsysteme für Probanden)
+
+| 2.16.840.1.113883.2.16.3.1.21.3.x
+| Codeschemata & Terminologien (JR‑eigene CodeSysteme, ValueSets, ConceptMaps)
+
+| 2.16.840.1.113883.2.16.3.1.21.3.1.x
+|    CodeSysteme
+
+| 2.16.840.1.113883.2.16.3.1.21.3.2.x
+|    ValueSets
+
+| 2.16.840.1.113883.2.16.3.1.21.3.3.x
+|    ConceptMaps
+
+| 2.16.840.1.113883.2.16.3.1.21.4.x
+| Dokumente/Richtlinien (Policies, Consent‑Profile, Studienprotokolle, XDS‑Klassen)
+
+| 2.16.840.1.113883.2.16.3.1.21.5.x
+| Services/APIs (eHealth‑Services, FHIR‑Server‑Instanzen, Decision‑Support‑Services)
+
+| 2.16.840.1.113883.2.16.3.1.21.6.x
+| Templates/Profiles (HL7 CDA Templates, FHIR StructureDefinition/Profile/IG)
+
+| 2.16.840.1.113883.2.16.3.1.21.7.x
+| System‑Artefakte (Softwaresysteme, Geräte, Sensor‑Plattformen)
+
+| 2.16.840.1.113883.2.16.3.1.21.8.x
+| Forschungsobjekte (Datensätze, Studien, Algorithmen, Scoring‑Modelle)
+
+| 2.16.840.1.113883.2.16.3.1.21.99.x
+| Experimentelle/temporäre Objekte (Pilotprojekte, Test‑Namespaces)
+|===
+
+* Die Aufteilung spiegelt die Kategorien aus dem OID‑Leitfaden (Instanzen, Identifikationsmechanismen, Codes, Services, Dokumente, Templates, Experimental) und die empfohlene Referenzstruktur für Organisationen (patients, personnel, locations, templates, systems etc.) wider.[link:https://www.elga.gv.at/fileadmin/user_upload/Dokumente_PDF_MP4/CDA/OID-Leitfaden_1-0-0.pdf[elga.gv]]
+* Wichtig ist, dass jede OID im internen Repository einen klaren Typ („CodeSysteme", „Identifier‑Namespaces", „FHIR ImplementationGuides", „Research Datasets") und Verantwortliche bekommt, wie es der Leitfaden für Metadaten fordert.[link:https://www.elga.gv.at/fileadmin/user_upload/Dokumente_PDF_MP4/CDA/OID-Leitfaden_1-0-0.pdf[elga.gv]]
+
+'''
+
+== FHIR Implementation Guides und Profile
+
+FHIR selbst verwendet URIs als „canonical" URLs, unterstützt aber auch URN‑OIDs (urn:oid:…) für CodeSystem und Identifier‑Namespaces, insbesondere zur Interoperabilität mit HL7 V3/CDA.[link:https://build.fhir.org/implementationguide.html[build.fhir]]
+
+Praktische Struktur:
+
+* *FHIR Implementation Guides (IGs)*
+** Gib jedem IG eine OID: z. B. 2.16.840.1.113883.2.16.3.1.21.6.10 für „JR FHIR IG Geriatrie Dokumentation".
+** In FHIR kannst du diese OID als `urn:oid:2.16.840.1.113883.2.16.3.1.21.6.10` verwenden, zusätzlich zu einer HTTP‑Canonical‑URL, wenn ihr eine Webseite für das IG habt.[link:https://build.fhir.org/implementationguide.html[build.fhir]]
+* *FHIR Profile/StructureDefinitions*
+** Einzelne Profile/StructureDefinitions erhalten eigene OIDs unterhalb eines „Templates/Profiles"-Zweigs, analog zur Verwendung von OIDs für HL7 CDA‑Templates und FHIR‑Profile in IHE/HL7‑Beispielen.[link:https://packages.fhir.org/guide/medizininformatikinitiative-dokument?version=current[packages.fhir]]
+* *FHIR CodeSystem/ValueSet*
+** Für JR‑eigene Terminologien (z. B. hausinterne klinische Scores, geriatric frailty codes) nutzt du den CodeSysteme‑Zweig (*.3.1.x).
+** Die OID wird als Root/CodeSystem und der eigentliche Code als Extension/Code verwendet; damit sind die Codes weltweit eindeutig.[link:https://www.elga.gv.at/fileadmin/user_upload/Dokumente_PDF_MP4/CDA/OID-Leitfaden_1-0-0.pdf[elga.gv]]
+
+Damit deckt dein Konzept FHIR IGs, Profiles, CodeSystem/ValueSet sauber ab, bleibt HL7‑kompatibel und integriert sich in den österreichischen OID‑Rahmen.
+
+'''
+
+== Sonstige eHealth‑Artefakte und Forschung
+
+Um „sonstiges in der eHealth Welt und deren Forschung" unterzubringen, kann man den Forschungs‑Zweig und System‑Zweig bewusst breit anlegen:
+
+* *Forschungsobjekte (8.x)*
+** OIDs für Studien (z. B. spezifische Kohorten), Forschungsdatensätze, KI‑Modelle für Risiko‑Prediction, Scoring‑Methoden, Validierte Fragebögen.
+** Jede OID beschreibt dann das jeweilige Informationsobjekt (Definition des Score, Version des Modells, Datensatzbeschreibung) – genau so, wie der Leitfaden Informationsobjekte und experimentelle Objekte definiert.[link:https://www.elga.gv.at/fileadmin/user_upload/Dokumente_PDF_MP4/CDA/OID-Leitfaden_1-0-0.pdf[elga.gv]]
+* *eHealth‑Services und Plattformen (5.x, 7.x)*
+** Telemedizin‑Plattformen, Entscheidungsunterstützungssysteme, OR‑Workflow‑Lösungen, Geriatrie‑Benchmarking‑Tools etc., wie sie in euren Digital‑Healthcare‑Solutions beschrieben werden.[link:https://www.joanneum.at/health/en/research-groups/digital-healthcare-solutions/[joanneum]]
+** Services bekommen OIDs im Service‑Zweig, beteiligte Systeme/Installationen im System‑Zweig, sodass du sowohl „Dienst" als auch „konkrete Instanz" unterscheiden kannst.[link:https://www.elga.gv.at/fileadmin/user_upload/Dokumente_PDF_MP4/CDA/OID-Leitfaden_1-0-0.pdf[elga.gv]]
+
+So kann man Forschungs‑Artefakte und praktische Lösungen neben klassischen Terminologien und FHIR‑Artefakten konsistent in einem gemeinsamen OID‑Modell halten.
+
+'''
+
+== Governance und praktische Umsetzung
+
+* *OID‑Repository und Metadaten:* +
+Einrichtung eines internes Repositories (DB oder Wiki oder sonstige Doku), das pro OID Metadaten wie Name, Typ, Beschreibung, Version, Status (aktiv, obsolet, experimentell) und Verantwortlichen pflegt – genau das fordert der Leitfaden für das nationale OID‑Repository.[link:https://www.elga.gv.at/fileadmin/user_upload/Dokumente_PDF_MP4/CDA/OID-Leitfaden_1-0-0.pdf[elga.gv]]
+* *Vergaberegeln und Namenskonventionen:* +
+Definition von Vergaberegeln (wer darf neue Unterknoten vergeben, wann wird .99 verwendet, wie werden experimentelle OIDs später „stabilisiert") im Sinne der „Best Practice"-Regeln des Leitfadens.[link:https://www.elga.gv.at/fileadmin/user_upload/Dokumente_PDF_MP4/CDA/OID-Leitfaden_1-0-0.pdf[elga.gv]]
+* *Abstimmung mit HL7 Austria/EHSREG:* +
+Für neue, öffentlich relevante OIDs (z. B. CodeSysteme, Services, IGs, die außerhalb eurer Projekte verwendet werden) lohnt sich die Meldung an HL7 Austria bzw. EHSREG, da diese laut Leitfaden und HL7‑Austria‑Information für Registrierung und Veröffentlichung zuständig sind.[link:https://hl7.at/oid-vergabe-durch-hl7-austria/[hl7]]
+** Jedoch hat dies aktuell nur eine HL7 Organisation einmal gemacht (PKP mit link:https://www.gesundheit.gv.at/OID_Frontend/oid-static/2/16/840/1/113883/2/16/3/1/7/12.html[*2.16.840.1.113883.2.16.3.1.7.12 (dokmon)*]), und nach Sabutschs Email würde ich mich bei dem eher zurückhalten, auch wenn es im Leitfaden empfohlen wird. Falls das eigene OID-Repo öffentlich und die Metadaten für Suchmaschinen indizierbar ist, wäre die Meldung so oder so nicht notwendig.
+
+

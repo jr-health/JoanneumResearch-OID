@@ -1,0 +1,300 @@
+= OID-Konzept Joanneum Research — Bewertung und Empfehlung
+Thomas Truskaller <thomas.truskaller@joanneum.at>
+2026-06-26
+:toc:
+:toc-title: Inhaltsverzeichnis
+:toclevels: 3
+:sectnums:
+
+Dieses Dokument bewertet den Konzeptvorschlag aus link:konzept-vorschlag-tanjga.adoc[konzept-vorschlag-tanjga.adoc] auf Basis des
+EHSREG OID-Leitfadens (Version 1.0.0, August 2011) und leitet daraus eine angepasste
+Struktur sowie eine konkrete Umsetzungsempfehlung für das interne JR-OID-Repository ab.
+
+'''
+
+== Einordnung des JR-OID-Knotens
+
+JOANNEUM RESEARCH verfügt über den HL7-Austria-Organisationsknoten
+`2.16.840.1.113883.2.16.3.1.21` und ist damit berechtigt, den darunter liegenden Teilbaum
+eigenverantwortlich zu verwalten (gemäß ISO/IEC 9834-1 und ÖNORM A 2642:2011).
+
+Für die Verwaltung dieses Teilbaums gilt:
+
+* JR agiert als *Registration Authority* für den eigenen Unterbaum.
+* Die Registrierungsbefugnis darf *nicht* an weitere Organisationen weitergegeben werden
+  (ausschließliches Recht der EHSREG, OID-Leitfaden Kap. 4.6.3).
+* Einmal vergebene OIDs sind *dauerhaft gültig* und können nicht zurückgezogen werden.
+* Alle vergebenen OIDs sollen in einem internen Repository mit vollständigen Metadaten
+  gepflegt werden.
+
+'''
+
+== Bewertung der vorgeschlagenen Hauptzweige
+
+=== Vergleich mit der eHealth-Austria-Referenzstruktur
+
+Der Tanjga-Vorschlag orientiert sich inhaltlich korrekt an den Objekttypen des Leitfadens,
+weicht aber in der Nummerierung von der nationalen Referenzstruktur ab
+(Abbildung 4 / Tabelle 1 des Leitfadens).
+
+[%autowidth,cols="1,1,1,1"]
+|===
+| *Tanjga-Vorschlag* | *Zweck* | *eHealth-Austria* | *Bewertung*
+
+| .1.x | Instanz-Identifier-Namespaces | .3 instance-identifier | ✓ inhaltlich korrekt
+| .2.x | Identifikationsmechanismen | .4 identification-mechanism | ✓ inhaltlich korrekt
+| .3.x | Codeschemata & Terminologien | .5 code-schemes | ✓ inhaltlich korrekt
+| .4.x | Dokumente / Richtlinien | .7 documents | ✓ inhaltlich korrekt
+| .5.x | Services / APIs | .6 services | ✓ inhaltlich korrekt
+| .6.x | Templates / Profile | .11 templates | ✓ inhaltlich korrekt
+| .7.x | System-Artefakte | (.12 systems, Org-Ebene) | ~ nur in Org-Referenzstruktur
+| .8.x | Forschungsobjekte | — | ℹ️ kein offizieller Typ, JR-spezifisch
+| —    | Alias | .9 alias | ✗ *fehlt* im Vorschlag
+| .99.x | Experimentell | .99 experimental | ✓ 1:1 übernommen
+|===
+
+=== Kritische Punkte
+
+==== Fehlender Alias-Knoten
+
+Der Leitfaden (Kap. 4.4) sieht explizit einen Alias-Knoten vor.
+Hintergrund: DICOM beschränkt die Länge einer UID auf *64 Zeichen*.
+Der JR-Root `2.16.840.1.113883.2.16.3.1.21` hat bereits 30 Zeichen — tiefere Knoten
+(z.B. `.6.10` für einen spezifischen FHIR IG) überschreiten die 64-Zeichen-Grenze schnell.
+Ein `.9 alias`-Zweig erlaubt, für solche Fälle kürzere Alias-OIDs anzulegen, ohne die
+ursprüngliche OID zu invalidieren.
+
+==== Forschungsobjekte (.8.x)
+
+Das offizielle Metadatenschema des Leitfadens (Tabelle 3, Feld `category`) kennt die
+Kategorien: `identificationscheme | organization | person | community | codingscheme |
+document | alias | template | experimental`. Weder „service" noch „research" sind offizielle
+EHSREG-Kategorien.
+
+Forschungsobjekte müssten formal als `experimental` oder `document` kategorisiert werden.
+Da JR als Forschungseinrichtung jedoch spezifische Artefakte verwaltet (Studien, KI-Modelle,
+Datensätze, Scoring-Methoden), die sich nicht sinnvoll unter `experimental` subsumieren
+lassen, *wird der Zweig .8 Forschungsobjekte bewusst beibehalten* — mit dem Hinweis,
+dass im `category`-Feld intern der nächstliegende offizielle Typ verwendet werden sollte
+(typisch: `document` oder `experimental`).
+
+==== Instanz-Identifier: Untergliederung empfohlen
+
+Die EHSREG-Referenzstruktur für Organisationen (Abbildung 5, Tabelle 2) empfiehlt
+unterhalb des Instanz-Identifier-Knotens eine Untergliederung in `.1 documents`,
+`.2 patients`, `.3 personnel`, `.4 locations`, `.6 devices`, `.12 systems` etc.
+Für JR ist zumindest eine Unterscheidung zwischen Probanden-IDs, Mitarbeiter-IDs und
+IT-Systemen sinnvoll, da die Adressräume für diese Objekte unterschiedliche Governance
+erfordern.
+
+'''
+
+== Empfohlene JR-OID-Baumstruktur
+
+Auf Basis der Bewertung wird folgende revidierte Struktur empfohlen.
+Die sequenzielle Nummerierung (1–9, 99) des Tanjga-Vorschlags bleibt erhalten —
+sie ist für einen organisationseigenen Teilbaum zulässig und einfacher zu verstehen
+als eine Spiegelung der eHealth-Austria-Nummern.
+
+[%autowidth,cols="2,1,3"]
+|===
+| *OID-Muster* | *Symbolischer Name* | *Inhalt / Zweck*
+
+| 2.16.840.1.113883.2.16.3.1.21.*1*.x | instance-identifier | Instanz-Identifier-Namespaces
+| 2.16.840.1.113883.2.16.3.1.21.1.*1*.x | patients | Probanden-IDs, Fallnummern
+| 2.16.840.1.113883.2.16.3.1.21.1.*2*.x | personnel | Mitarbeiter-IDs
+| 2.16.840.1.113883.2.16.3.1.21.1.*3*.x | systems | IT-Systeme (PräNUDGE, HAPI, …)
+| 2.16.840.1.113883.2.16.3.1.21.*2*.x | identification-mechanism | Identifikationsmechanismen (Nummernsysteme für Probanden)
+| 2.16.840.1.113883.2.16.3.1.21.*3*.x | code-schemes | Codeschemata & Terminologien
+| 2.16.840.1.113883.2.16.3.1.21.3.*1*.x | code-systems | CodeSystems
+| 2.16.840.1.113883.2.16.3.1.21.3.*2*.x | value-sets | ValueSets
+| 2.16.840.1.113883.2.16.3.1.21.3.*3*.x | concept-maps | ConceptMaps
+| 2.16.840.1.113883.2.16.3.1.21.*4*.x | documents | Policies, Consent-Profile, Studienprotokolle, XDS-Klassen
+| 2.16.840.1.113883.2.16.3.1.21.*5*.x | services | eHealth-Services, FHIR-Server-Instanzen, APIs
+| 2.16.840.1.113883.2.16.3.1.21.*6*.x | templates | FHIR StructureDefinitions / Profile / Implementation Guides
+| 2.16.840.1.113883.2.16.3.1.21.*7*.x | system-artefacts | Softwaresysteme, Geräte, Sensor-Plattformen
+| 2.16.840.1.113883.2.16.3.1.21.*8*.x | research | Studien, Datensätze, KI-Modelle, Scoring-Methoden _(JR-spezifisch)_
+| 2.16.840.1.113883.2.16.3.1.21.*9*.x | alias | Kürzere Alias-OIDs (z.B. für DICOM-Kompatibilität, max. 64 Zeichen)
+| 2.16.840.1.113883.2.16.3.1.21.*99*.x | experimental | Pilotprojekte, Test-Namespaces _(nicht für Produktion!)_
+|===
+
+NOTE: Die Untergliederung von .1 (instance-identifier) ist zunächst optional.
+Sie kann bei Bedarf nachträglich ergänzt werden, da die Nummern unterhalb des
+Elternknotens frei vergeben werden können.
+
+'''
+
+== OID-Repository: Optionen im Vergleich
+
+Der Leitfaden (Kap. 5.4) schreibt für jede OID folgende Pflicht-Metadaten vor:
+`dotNotation`, `symbolicName`, `category`, `status` (active / inactive / retired / pending),
+`description` in Deutsch *und* Englisch, `registrationAuthority`, `responsibleAuthority`.
+Zusätzlich empfohlen: `creationDate`, `lastmodifiedDate`, `link_uri`.
+
+[%autowidth,cols="1,2,2"]
+|===
+| *Option* | *Vorteile* | *Nachteile*
+
+| *A — Spreadsheet* (Excel/CSV)
+| Sofort einsatzbereit, kein Setup
+| Kein Audit-Trail, keine Validierung, nicht maschinenlesbar, kein Schutz vor Doppelvergabe
+
+| *B — Wiki* (Confluence/Notion)
+| Durchsuchbar, Versionshistorie, bekannte Werkzeuge
+| Keine Metadatenvalidierung, kein strukturierter Export, kein API-Zugriff
+
+| *C — Git-Repository + JSON + Sveltia CMS* (Empfehlung)
+| Vollständiger Audit-Trail, CI-Validierung, maschinenlesbar, öffentlich publizierbar,
+  vorhandene Infrastruktur (Gitea), bekannte Technologie (Sveltia CMS bereits im Einsatz)
+| Technische Hürde für nicht-technische Mitarbeiter (durch Sveltia CMS aber minimierbar)
+
+| *D — Externes OID-Portal* (oid-base.com, gesundheit.gv.at)
+| Standardkonform, öffentlich auffindbar ohne eigenen Betrieb
+| Externe Abhängigkeit, in AT kaum genutzt (nur ein Beispiel: PKP/dokmon), laut Sabutsch nicht empfohlen
+|===
+
+'''
+
+== Empfehlung: Option C — Git + JSON + Sveltia CMS
+
+=== Grundprinzip
+
+Jede OID (oder jeder Zweig) wird als *eine JSON-Datei* im Git-Repository geführt.
+Das Repository liegt auf dem vorhandenen Gitea (`hthv014.joanneum.at`).
+Die Bearbeitung erfolgt über *Sveltia CMS* — analog zum bestehenden
+`prenudge-health-profile/`-Repo, wo Sveltia CMS bereits für den Health-Profile-Katalog
+eingesetzt wird.
+
+=== JSON-Dateistruktur (Beispiel)
+
+[source,json]
+----
+{
+  "dotNotation": "2.16.840.1.113883.2.16.3.1.21.6.1",
+  "symbolicName": "prenudge-appdata-r4",
+  "category": "template",
+  "status": "active",
+  "description": [
+    { "lang": "de", "text": "PräNUDGE FHIR R4 Implementation Guide (AppData)" },
+    { "lang": "en", "text": "PräNUDGE FHIR R4 Implementation Guide (AppData)" }
+  ],
+  "link_uri": "https://github.com/JoanneumResearch/JoanneumResearch-PreNUDGE-AppData-R4",
+  "creationDate": "2026-06-26",
+  "lastmodifiedDate": "2026-06-26",
+  "responsibleAuthority": {
+    "person_name": "Thomas Truskaller",
+    "organization_name": "JOANNEUM RESEARCH Forschungsgesellschaft mbH",
+    "organization_telecom": "thomas.truskaller@joanneum.at"
+  }
+}
+----
+
+=== Verzeichnisstruktur im Repository
+
+----
+JoanneumResearch-OID/
+  oids/
+    1-instance-identifier/
+      1-1-patients/
+      1-2-personnel/
+      1-3-systems/
+    3-code-schemes/
+      3-1-code-systems/
+      3-2-value-sets/
+      3-3-concept-maps/
+    5-services/
+    6-templates/
+      prenudge-appdata-r4.json
+      prenudge-fhir-ig-geriatrie.json
+    7-system-artefacts/
+    8-research/
+    9-alias/
+    99-experimental/
+  schema/
+    oid-entry.schema.json   <-- JSON Schema zur Validierung
+  .sveltia-cms/
+    config.yml              <-- Sveltia CMS Konfiguration
+----
+
+=== CI-Validierung
+
+Bei jedem Commit (Gitea CI / Bamboo) wird geprüft:
+
+* Alle Pflichtfelder gemäß JSON-Schema vorhanden
+* `symbolicName` eindeutig im gesamten Repo
+* `dotNotation` eindeutig und syntaktisch korrekt (nur Ziffern und Punkte)
+* `description` enthält Einträge für `de` und `en`
+* `status` ist ein gültiger Wert
+
+=== Öffentliche Publikation
+
+Aus den JSON-Dateien kann mit einem einfachen Script (Python oder Node.js) eine
+*statische HTML-Seite* generiert werden, die öffentlich zugänglich und von Suchmaschinen
+indizierbar ist. Damit entfällt die Notwendigkeit einer formalen EHSREG-Meldung
+(wie auch Tanjga in seinem Vorschlag anmerkt).
+
+=== Wie machen das andere Organisationen?
+
+* *Medizininformatik-Initiative (MII, Deutschland)*: Git + simplifier.net für FHIR IGs;
+  OID-Dokumentation im IG selbst, Metadaten auf simplifier.net.
+* *Schweiz (HL7)*: Webportal `oid-register.ch` — zentrales, öffentliches Portal mit API.
+* *Deutschland (DIMDI)*: Webportal mit Suchfunktion, strukturiertem Export.
+* *PKP/dokmon (Österreich)*: Einzige österreichische HL7-Organisation, die den
+  Organisations-Teilbaum öffentlich gemeldet hat (`2.16.840.1.113883.2.16.3.1.7.12`).
+  Einfache statische Seite auf `gesundheit.gv.at`.
+* *IHE*: OIDs für Policies direkt im ITI Technical Framework dokumentiert,
+  kein eigenständiges externes Repository.
+
+Der Git-basierte Ansatz entspricht dem aktuellen Stand der Praxis bei modernen
+FHIR-IG-Projekten und passt zur bestehenden JR-Infrastruktur.
+
+'''
+
+== Governance-Regeln
+
+=== OID-Vergabeprozess
+
+. *Antrag*: Neue OID-Anforderung als Issue im Gitea-Repo mit: gewünschter Zweig,
+  Zweck, symbolicName-Vorschlag, verantwortliche Person.
+. *Prüfung*: OID-Verantwortliche/r bei JR prüft Eindeutigkeit und Zuordnung zum
+  korrekten Zweig.
+. *Vergabe*: JSON-Datei anlegen, Commit, CI-Check grün → OID ist aktiv.
+. *Keine Rücknahme*: Einmal vergebene OIDs bleiben dauerhaft gültig. Status kann
+  auf `retired` gesetzt werden, die OID selbst bleibt im Repository.
+
+=== Verantwortlichkeiten pro Zweig
+
+[%autowidth,cols="1,2"]
+|===
+| *Zweig* | *Empfohlene Verantwortung*
+
+| .1 instance-identifier | Projektleitung / Datenschutzbeauftragte/r
+| .3 code-schemes | FHIR IG Autor:innen (PräNUDGE)
+| .4 documents | Projektleitung
+| .5 services | DevOps / Systemarchitektur
+| .6 templates | FHIR IG Autor:innen (PräNUDGE)
+| .7 system-artefacts | DevOps / IT
+| .8 research | Wissenschaftliche/r Projektleiter:in je Studie
+| .9 alias | Wer die ursprüngliche OID vergeben hat
+| .99 experimental | Frei, kein formaler Freigabeprozess notwendig
+|===
+
+=== Namenskonventionen (gemäß Leitfaden Kap. 4.7.2)
+
+* `symbolicName`: Kleinbuchstaben, Ziffern, Bindestriche; beginnt mit Kleinbuchstabe;
+  max. 25 Zeichen; kein Bindestrich am Anfang oder Ende, keine zwei aufeinanderfolgenden
+  Bindestriche.
+* Beschreibungen: immer DE + EN.
+* OID-Länge: max. 255 Zeichen (Dot-Notation); empfohlen max. 64 Zeichen für
+  DICOM-Kompatibilität — bei Überschreitung Alias-Eintrag anlegen.
+
+'''
+
+== Offene Punkte / Nächste Schritte
+
+. [ ] JSON-Schema für OID-Einträge definieren (Pflichtfelder, erlaubte `category`-Werte)
+. [ ] Sveltia CMS Konfiguration für das OID-Repository erstellen
+. [ ] Erste OID-Einträge anlegen: JR-Root-Knoten + bestehende PräNUDGE-FHIR-IG-OID
+. [ ] CI-Validierungsscript implementieren (Gitea/Bamboo)
+. [ ] Entscheidung: öffentliche statische Seite ja/nein (Voraussetzung: Repo öffentlich)
+. [ ] Verantwortliche pro Zweig festlegen

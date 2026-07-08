@@ -150,7 +150,7 @@ Pflicht-Metadaten gemäß OID-Leitfaden Kap. 5.4: `dotNotation`, `symbolicName`,
 - [ ] Sveltia CMS Konfiguration erstellen (`.sveltia-cms/config.yml`)
 - [ ] Erste OID-Einträge anlegen: JR-Root-Knoten + PräNUDGE FHIR IG
 - [ ] CI-Validierungsscript implementieren (Gitea/Bamboo): Eindeutigkeit, Schema, DE+EN-Beschreibung
-- [x] Öffentliche Publikation: statische Webseite unter https://oid.joanneum.at
+- [ ] Öffentliche Publikation: statische Webseite unter https://oid.joanneum.at
 - [ ] Verantwortliche pro Zweig festlegen
 
 ---

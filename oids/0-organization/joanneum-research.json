@@ -1,0 +1,25 @@
+{
+  "dotNotation": "2.16.840.1.113883.2.16.3.1.21",
+  "category": "organization",
+  "symbolicName": "joanneum-research",
+  "status": "active",
+  "description": [
+    {
+      "lang": "de",
+      "text": "JOANNEUM RESEARCH Forschungsgesellschaft mbH – Organisations-Root-OID, zugewiesen durch HL7 Austria. Wurzelknoten für das JR-OID-Registry."
+    },
+    {
+      "lang": "en",
+      "text": "JOANNEUM RESEARCH Forschungsgesellschaft mbH – organization root OID, assigned by HL7 Austria. Root node of the JR OID registry."
+    }
+  ],
+  "registrationAuthority": "HL7 Austria",
+  "responsibleAuthority": {
+    "person_name": "Thomas Truskaller",
+    "organization_name": "JOANNEUM RESEARCH Forschungsgesellschaft mbH",
+    "organization_telecom": "thomas.truskaller@joanneum.at"
+  },
+  "creationDate": "2026-06-26",
+  "lastmodifiedDate": "2026-07-08",
+  "link_uri": "https://oid.joanneum.at (TODO)"
+}

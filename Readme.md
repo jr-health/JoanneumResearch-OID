@@ -27,10 +27,8 @@ Suchmaschinen indizierbar. Damit entfällt eine formale Meldung an EHSREG/HL7 Au
 
 | OID-Muster | Symbolischer Name | Inhalt / Zweck |
 |---|---|---|
-| `2.16.840.1.113883.2.16.3.1.21.1.x` | `instance-identifier` | Instanz-Identifier-Namespaces |
-| `2.16.840.1.113883.2.16.3.1.21.1.1.x` | `patients` | Probanden-IDs, Fallnummern |
-| `2.16.840.1.113883.2.16.3.1.21.1.2.x` | `personnel` | Mitarbeiter-IDs |
-| `2.16.840.1.113883.2.16.3.1.21.1.3.x` | `systems` | IT-Systeme (PräNUDGE, HAPI, …) |
+| `2.16.840.1.113883.2.16.3.1.21` | `organization` | Root-Knoten (JR selbst); fixer Einzeleintrag, nicht erweiterbar |
+| `2.16.840.1.113883.2.16.3.1.21.1.x` | `instance-identifier` | Instanz-Identifier-Namespaces (Patienten-/Probanden-IDs, Fall-IDs, Studien-IDs etc.) – gemäß Tanjga-Vorschlag ohne Unterteilung |
 | `2.16.840.1.113883.2.16.3.1.21.2.x` | `identification-mechanism` | Identifikationsmechanismen |
 | `2.16.840.1.113883.2.16.3.1.21.3.x` | `code-schemes` | Codeschemata & Terminologien |
 | `2.16.840.1.113883.2.16.3.1.21.3.1.x` | `code-systems` | CodeSystems |
@@ -51,10 +49,9 @@ Suchmaschinen indizierbar. Damit entfällt eine formale Meldung an EHSREG/HL7 Au
 ```
 JoanneumResearch-OID/
   oids/
+    0-organization/
+      joanneum-research.json
     1-instance-identifier/
-      1-1-patients/
-      1-2-personnel/
-      1-3-systems/
     2-identification-mechanism/
     3-code-schemes/
       3-1-code-systems/
@@ -115,7 +112,9 @@ Pflicht-Metadaten gemäß OID-Leitfaden Kap. 5.4: `dotNotation`, `symbolicName`,
 
 | Zweig | Empfohlene Verantwortung |
 |---|---|
+| `organization` (Root) | OID-Verantwortliche/r (create/delete gesperrt, nur Bearbeitung) |
 | `.1` instance-identifier | Projektleitung / Datenschutzbeauftragte/r |
+| `.2` identification-mechanism | Projektleitung / Datenschutzbeauftragte/r |
 | `.3` code-schemes | FHIR IG Autor:innen |
 | `.4` documents | Projektleitung |
 | `.5` services | DevOps / Systemarchitektur |
@@ -134,6 +133,33 @@ Pflicht-Metadaten gemäß OID-Leitfaden Kap. 5.4: `dotNotation`, `symbolicName`,
 
 ---
 
+## Sveltia CMS lokal ausführen
+
+Anders als beim alten Netlify/Decap CMS braucht Sveltia CMS für lokales
+Arbeiten **keinen Proxy-Server** und kein `local_backend` in der Config
+(`@sveltia/cms-proxy-server` existiert für Sveltia CMS nicht und funktioniert
+daher nicht). Stattdessen nutzt Sveltia CMS die File-System-Access-API des
+Browsers direkt:
+
+1. **Statischen Server** im Repo-Root starten, da `admin/index.html` kein
+   Build-Tool hat, z. B.:
+   ```
+   npx http-server .
+   ```
+   (alternativ `npx serve .`)
+2. `admin/index.html` in einem **Chromium-basierten Browser** öffnen (Chrome,
+   Edge oder Brave — **Firefox/Safari funktionieren nicht**, da die File
+   System Access API benötigt wird).
+3. Auf **„Work with Local Repository"** klicken und den Projekt-Root-Ordner
+   auswählen.
+
+**Wichtig:** Der lokale Modus macht **keine Git-Operationen** — Commit und
+Push müssen weiterhin manuell per Git erfolgen. Für den Produktivbetrieb
+gegen das echte GitHub-Backend muss zusätzlich das OAuth-Relay eingerichtet
+werden (siehe Kommentar oben in `.sveltia-cms/config.yml`).
+
+---
+
 ## Dokumente
 
 | Datei | Inhalt |
@@ -146,11 +172,11 @@ Pflicht-Metadaten gemäß OID-Leitfaden Kap. 5.4: `dotNotation`, `symbolicName`,
 
 ## Offene Punkte
 
-- [ ] JSON-Schema für OID-Einträge definieren (`schema/oid-entry.schema.json`)
-- [ ] Sveltia CMS Konfiguration erstellen (`.sveltia-cms/config.yml`)
-- [ ] Erste OID-Einträge anlegen: JR-Root-Knoten + PräNUDGE FHIR IG
-- [ ] CI-Validierungsscript implementieren (Gitea/Bamboo): Eindeutigkeit, Schema, DE+EN-Beschreibung
-- [ ] Öffentliche Publikation: statische Webseite unter https://oid.joanneum.at
+- [x] JSON-Schema für OID-Einträge definieren (`schema/oid-entry.schema.json`)
+- [x] Sveltia CMS Konfiguration erstellen (`.sveltia-cms/config.yml`)
+- [x] Erste OID-Einträge anlegen: JR-Root-Knoten + PräNUDGE FHIR IG
+- [ ] CI-Validierungsscript implementieren (Gitea/Bamboo --> jetzt Github Actions?): Eindeutigkeit, Schema, DE+EN-Beschreibung
+- [ ] Öffentliche Publikation: statische Webseite unter https://oid.joanneum.at oder über GitHub actions
 - [ ] Verantwortliche pro Zweig festlegen
 
 ---

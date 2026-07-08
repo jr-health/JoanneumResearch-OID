@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://oid.joanneum.at/schema/oid-entry.schema.json",
+  "title": "JR OID Entry",
+  "description": "Ein Eintrag im OID-Registry von JOANNEUM RESEARCH unterhalb von 2.16.840.1.113883.2.16.3.1.21, gemäß EHSREG OID-Leitfaden v1.0.0 Kap. 5.4.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "dotNotation",
+    "symbolicName",
+    "category",
+    "status",
+    "description",
+    "registrationAuthority",
+    "responsibleAuthority",
+    "creationDate",
+    "lastmodifiedDate"
+  ],
+  "properties": {
+    "dotNotation": {
+      "type": "string",
+      "description": "Vollständige OID in Dot-Notation, unterhalb (oder gleich) des JR-Roots 2.16.840.1.113883.2.16.3.1.21. Repo-weit eindeutig. Max. 255 Zeichen; empfohlen max. 64 Zeichen für DICOM-Kompatibilität (sonst Alias-Eintrag unter .9 anlegen).",
+      "pattern": "^2\\.16\\.840\\.1\\.113883\\.2\\.16\\.3\\.1\\.21(\\.\\d+)*$",
+      "maxLength": 255
+    },
+    "symbolicName": {
+      "type": "string",
+      "description": "Kleinbuchstaben/Ziffern/Bindestriche, beginnt mit Kleinbuchstabe, max. 25 Zeichen, keine führenden/abschließenden/doppelten Bindestriche. Repo-weit eindeutig.",
+      "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$",
+      "maxLength": 25
+    },
+    "category": {
+      "type": "string",
+      "description": "Offizieller EHSREG-Objekttyp (OID-Leitfaden Tabelle 3).",
+      "enum": [
+        "identificationscheme",
+        "organization",
+        "person",
+        "community",
+        "codingscheme",
+        "document",
+        "alias",
+        "template",
+        "experimental"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "inactive", "retired", "pending"]
+    },
+    "description": {
+      "type": "array",
+      "description": "Beschreibung in Deutsch und Englisch. Beide Sprachen sind Pflicht.",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["lang", "text"],
+        "properties": {
+          "lang": { "type": "string", "enum": ["de", "en"] },
+          "text": { "type": "string", "minLength": 1 }
+        }
+      },
+      "allOf": [
+        { "contains": { "properties": { "lang": { "const": "de" } }, "required": ["lang"] } },
+        { "contains": { "properties": { "lang": { "const": "en" } }, "required": ["lang"] } }
+      ]
+    },
+    "registrationAuthority": {
+      "type": "string",
+      "description": "Stelle, die diese konkrete OID vergeben hat (i.d.R. 'JOANNEUM RESEARCH Forschungsgesellschaft mbH' für Knoten unterhalb des JR-Roots; für den Root-Knoten selbst 'HL7 Austria').",
+      "minLength": 1
+    },
+    "responsibleAuthority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["person_name", "organization_name", "organization_telecom"],
+      "properties": {
+        "person_name": { "type": "string", "minLength": 1 },
+        "organization_name": { "type": "string", "minLength": 1 },
+        "organization_telecom": {
+          "type": "string",
+          "pattern": "^.+@.+\\..+$"
+        }
+      }
+    },
+    "creationDate": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "lastmodifiedDate": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "link_uri": {
+      "type": "string",
+      "description": "Optional: IG-Repo, Studienseite, Dokumentation o. Ä.",
+      "pattern": "^https?://.+"
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "dotNotation": "2.16.840.1.113883.2.16.3.1.21.6.1",
+  "symbolicName": "prenudge-appdata-r4",
+  "category": "template",
+  "status": "pending",
+  "description": [
+    {
+      "lang": "de",
+      "text": "PräNUDGE FHIR® IG für Datenlieferanden / Daten von Apps (R4)"
+    },
+    {
+      "lang": "en",
+      "text": "PreNUDGE FHIR® IG for Data Provider / Data from Apps (R4)"
+    }
+  ],
+  "registrationAuthority": "JOANNEUM RESEARCH Forschungsgesellschaft mbH",
+  "responsibleAuthority": {
+    "person_name": "Thomas Truskaller",
+    "organization_name": "JOANNEUM RESEARCH Forschungsgesellschaft mbH",
+    "organization_telecom": "thomas.truskaller@joanneum.at"
+  },
+  "creationDate": "2026-06-26",
+  "lastmodifiedDate": "2026-07-08",
+  "link_uri": "https://fhir.hl7.at/r4-JoanneumResearch-PreNUDGE-AppData-main/index.html"
+}

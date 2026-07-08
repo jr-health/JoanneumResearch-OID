@@ -1,0 +1,727 @@
+# Sveltia CMS – Konfiguration für das JR-OID-Registry
+# Doku: https://github.com/sveltia/sveltia-cms
+#
+# Backend: GitHub (Umstieg von Gitea -> GitHub).
+# Sveltia CMS stellt – anders als das alte Netlify git-gateway – KEINEN
+# gemeinsamen OAuth-Server bereit. Für den Produktivbetrieb muss einmalig ein
+# OAuth-Relay deployed werden (z. B. `sveltia-cms-auth` auf Cloudflare Workers):
+#   1. GitHub OAuth App anlegen (Homepage = https://oid.joanneum.at,
+#      Callback = https://<dein-relay>/callback).
+#   2. Relay mit Client-ID/Secret deployen.
+#   3. `base_url` (+ ggf. `auth_endpoint`) unten auf das Relay setzen.
+#
+# Für lokales Testen ist KEIN Proxy-Server und KEIN `local_backend` nötig
+# (anders als beim alten Netlify/Decap CMS) – siehe README, Abschnitt
+# "Sveltia CMS lokal ausführen": einfach admin/index.html per Chromium-
+# Browser (Chrome/Edge/Brave) öffnen und über "Work with Local Repository"
+# direkt den Projektordner auswählen.
+
+backend:
+  name: github
+  repo: jr-health/JoanneumResearch-OID
+  branch: main
+  # base_url: https://<dein-oauth-relay>       # z. B. Cloudflare Worker
+  # auth_endpoint: auth                          # Default; nur bei abweichendem Relay ändern
+  commit_messages:
+    create: 'OID: {{slug}} angelegt ({{collection}})'
+    update: 'OID: {{slug}} aktualisiert ({{collection}})'
+    delete: 'OID: {{slug}} entfernt ({{collection}})'
+    openAuthoring: '{{message}}'
+
+# Änderungen laufen als Draft/Review/Publish über Pull Requests (passt zum
+# OID-Governance-Prozess). Für direktes Commit auf `main` diese Zeile entfernt lassen.
+# HINWEIS: funktioniert nur gegen das echte GitHub-Backend, nicht im lokalen
+# "Work with Local Repository"-Modus (der macht ohnehin keine Git-Operationen).
+# publish_mode: editorial_workflow
+
+# Das Registry verwaltet keine Medien; Uploads werden nicht benötigt.
+media_folder: assets/uploads
+public_folder: /assets/uploads
+
+# Dateinamen bleiben nah am symbolicName (das Pattern erlaubt bereits nur
+# Kleinbuchstaben/Ziffern/Bindestriche).
+slug:
+  encoding: ascii
+  clean_accents: true
+
+collections:
+  # ---------------------------------------------------------------------------
+  # dotNotation und category sind je Collection unterschiedlich (eigener Default-
+  # Präfix bzw. eigener EHSREG-Kategorie-Default) und daher pro Collection einzeln
+  # ausgeschrieben. Die übrigen 8 Felder sind über alle Collections hinweg
+  # identisch und werden EINMAL hier (in "organization") per YAML-Anker je Feld
+  # definiert (&f_xxx) und in jeder weiteren Collection per Alias (*f_xxx)
+  # wiederverwendet. YAML-Merge-Keys (`<<`) werden von CMS-YAML-Parsern nicht
+  # zuverlässig unterstützt – deshalb Anker/Alias statt Merge.
+  # ---------------------------------------------------------------------------
+  - name: organization
+    label: '0 · Organization'
+    label_singular: 'OID-Eintrag'
+    description: 'Organisations-Root-Knoten (der JR-OID-Root selbst, 2.16.840.1.113883.2.16.3.1.21). create/delete deaktiviert – über die CMS-Oberfläche kann kein weiterer Eintrag angelegt oder der bestehende gelöscht werden.'
+    folder: oids/0-organization
+    create: false
+    delete: false
+    format: json
+    extension: json
+    identifier_field: symbolicName
+    slug: '{{fields.symbolicName}}'
+    summary: '{{fields.dotNotation}} — {{fields.symbolicName}} · {{fields.responsibleAuthority.person_name}}'
+    sortable_fields:
+      fields: [dotNotation, symbolicName, status, creationDate]
+      default: {field: dotNotation, direction: ascending}
+    fields:
+      - name: dotNotation
+        label: 'OID (Dot Notation)'
+        widget: string
+        required: true
+        pattern: ['^\d+(\.\d+)+$', 'Nur Ziffern und Punkte, z. B. 2.16.840.1.113883.2.16.3.1.21.6.1']
+        hint: 'Vollständige OID unterhalb von 2.16.840.1.113883.2.16.3.1.21. Muss repo-weit eindeutig sein. Max. 255 Zeichen (empf. ≤ 64 für DICOM-Kompatibilität).'
+        default: '2.16.840.1.113883.2.16.3.1.21'
+      - name: category
+        label: 'Kategorie'
+        widget: select
+        required: true
+        default: organization
+        hint: 'Offizieller EHSREG-Objekttyp (OID-Leitfaden Tabelle 3). Für den Root-Knoten immer „organization".'
+        options:
+          - identificationscheme
+          - organization
+          - person
+          - community
+          - codingscheme
+          - document
+          - alias
+          - template
+          - experimental
+      - &f_symbolicName
+        name: symbolicName
+        label: 'Symbolischer Name'
+        widget: string
+        required: true
+        pattern: ['^(?=.{1,25}$)[a-z][a-z0-9]*(-[a-z0-9]+)*$', 'Kleinbuchstaben/Ziffern/Bindestriche, Beginn mit Buchstabe, max. 25 Zeichen, keine führenden/abschließenden/doppelten Bindestriche']
+        hint: 'z. B. prenudge-appdata-r4. Repo-weit eindeutig.'
+      - &f_status
+        name: status
+        label: 'Status'
+        widget: select
+        required: true
+        default: active
+        options: [active, inactive, retired, pending]
+        hint: '„active": aktiv in Verwendung. „pending": beantragt/reserviert, noch nicht final vergeben. „inactive": vorübergehend nicht in Verwendung. „retired": dauerhaft abgelöst/deaktiviert. Vergebene OIDs werden nie gelöscht – zum Deaktivieren „retired" setzen.'
+      - &f_description
+        name: description
+        label: 'Beschreibung (DE + EN)'
+        widget: list
+        required: true
+        min: 2
+        max: 2
+        summary: '{{fields.lang}}: {{fields.text}}'
+        hint: 'Genau ein Eintrag für „de" und einer für „en" – beide verpflichtend.'
+        fields:
+          - {name: lang, label: 'Sprache', widget: select, options: [de, en], required: true}
+          - {name: text, label: 'Text', widget: string, required: true}
+        default:
+          - {lang: de, text: ''}
+          - {lang: en, text: ''}
+      - &f_registrationAuthority
+        name: registrationAuthority
+        label: 'Registration Authority'
+        widget: string
+        required: true
+        default: 'JOANNEUM RESEARCH Forschungsgesellschaft mbH'
+      - &f_responsibleAuthority
+        name: responsibleAuthority
+        label: 'Verantwortliche Stelle'
+        widget: object
+        required: true
+        fields:
+          - {name: person_name, label: 'Person', widget: string, required: true}
+          - {name: organization_name, label: 'Organisation', widget: string, default: 'JOANNEUM RESEARCH Forschungsgesellschaft mbH', required: true}
+          - {name: organization_telecom, label: 'E-Mail / Telecom', widget: string, required: true, pattern: ['.+@.+\..+', 'Bitte eine gültige E-Mail-Adresse angeben']}
+      - &f_creationDate
+        name: creationDate
+        label: 'Erstellungsdatum'
+        widget: datetime
+        required: true
+        format: 'YYYY-MM-DD'
+        date_format: 'YYYY-MM-DD'
+        time_format: false
+        picker_utc: true
+      - &f_lastmodifiedDate
+        name: lastmodifiedDate
+        label: 'Letzte Änderung'
+        widget: datetime
+        required: true
+        format: 'YYYY-MM-DD'
+        date_format: 'YYYY-MM-DD'
+        time_format: false
+        picker_utc: true
+        hint: 'Bei jeder Änderung aktualisieren.'
+      - &f_link_uri
+        name: link_uri
+        label: 'Link / URI'
+        widget: string
+        required: false
+        pattern: ['^https?://.+', 'Muss mit http:// oder https:// beginnen']
+        hint: 'Optional: IG-Repo, Studienseite, Doku o. Ä.'
+
+  - name: instance-identifier
+    label: '1.x · Instance Identifier'
+    label_singular: 'OID-Eintrag'
+    description: 'Instanz-Identifier-Namespaces: Patienten-IDs, Fall-IDs, Studien-IDs etc. (.1.x) – gemäß Tanjga-Vorschlag ohne Unterteilung'
+    folder: oids/1-instance-identifier
+    create: true
+    format: json
+    extension: json
+    identifier_field: symbolicName
+    slug: '{{fields.symbolicName}}'
+    summary: '{{fields.dotNotation}} — {{fields.symbolicName}} [{{fields.status}}] · {{fields.responsibleAuthority.person_name}}'
+    sortable_fields:
+      fields: [dotNotation, symbolicName, status, creationDate]
+      default: {field: dotNotation, direction: ascending}
+    fields:
+      - name: dotNotation
+        label: 'OID (Dot Notation)'
+        widget: string
+        required: true
+        pattern: ['^\d+(\.\d+)+$', 'Nur Ziffern und Punkte, z. B. 2.16.840.1.113883.2.16.3.1.21.6.1']
+        hint: 'Vollständige OID unterhalb von 2.16.840.1.113883.2.16.3.1.21. Muss repo-weit eindeutig sein. Max. 255 Zeichen (empf. ≤ 64 für DICOM-Kompatibilität).'
+        default: '2.16.840.1.113883.2.16.3.1.21.1.x'
+      - name: category
+        label: 'Kategorie'
+        widget: select
+        required: true
+        default: identificationscheme
+        hint: 'Offizieller EHSREG-Objekttyp (OID-Leitfaden Tabelle 3).'
+        options:
+          - identificationscheme
+          - organization
+          - person
+          - community
+          - codingscheme
+          - document
+          - alias
+          - template
+          - experimental
+      - *f_symbolicName
+      - *f_status
+      - *f_description
+      - *f_registrationAuthority
+      - *f_responsibleAuthority
+      - *f_creationDate
+      - *f_lastmodifiedDate
+      - *f_link_uri
+
+  - name: identification-mechanism
+    label: '2.x · Identification Mechanism'
+    label_singular: 'OID-Eintrag'
+    description: 'Identifikationsmechanismen / Nummernsysteme (.2.x)'
+    folder: oids/2-identification-mechanism
+    create: true
+    format: json
+    extension: json
+    identifier_field: symbolicName
+    slug: '{{fields.symbolicName}}'
+    summary: '{{fields.dotNotation}} — {{fields.symbolicName}} [{{fields.status}}] · {{fields.responsibleAuthority.person_name}}'
+    sortable_fields:
+      fields: [dotNotation, symbolicName, status, creationDate]
+      default: {field: dotNotation, direction: ascending}
+    fields:
+      - name: dotNotation
+        label: 'OID (Dot Notation)'
+        widget: string
+        required: true
+        pattern: ['^\d+(\.\d+)+$', 'Nur Ziffern und Punkte, z. B. 2.16.840.1.113883.2.16.3.1.21.6.1']
+        hint: 'Vollständige OID unterhalb von 2.16.840.1.113883.2.16.3.1.21. Muss repo-weit eindeutig sein. Max. 255 Zeichen (empf. ≤ 64 für DICOM-Kompatibilität).'
+        default: '2.16.840.1.113883.2.16.3.1.21.2.x'
+      - name: category
+        label: 'Kategorie'
+        widget: select
+        required: true
+        default: identificationscheme
+        hint: 'Offizieller EHSREG-Objekttyp (OID-Leitfaden Tabelle 3).'
+        options:
+          - identificationscheme
+          - organization
+          - person
+          - community
+          - codingscheme
+          - document
+          - alias
+          - template
+          - experimental
+      - *f_symbolicName
+      - *f_status
+      - *f_description
+      - *f_registrationAuthority
+      - *f_responsibleAuthority
+      - *f_creationDate
+      - *f_lastmodifiedDate
+      - *f_link_uri
+
+  - name: code-systems
+    label: '3.1.x · Code Schemes – CodeSystems'
+    label_singular: 'OID-Eintrag'
+    description: 'FHIR CodeSystems (.3.1.x)'
+    folder: oids/3-code-schemes/3-1-code-systems
+    create: true
+    format: json
+    extension: json
+    identifier_field: symbolicName
+    slug: '{{fields.symbolicName}}'
+    summary: '{{fields.dotNotation}} — {{fields.symbolicName}} [{{fields.status}}] · {{fields.responsibleAuthority.person_name}}'
+    sortable_fields:
+      fields: [dotNotation, symbolicName, status, creationDate]
+      default: {field: dotNotation, direction: ascending}
+    fields:
+      - name: dotNotation
+        label: 'OID (Dot Notation)'
+        widget: string
+        required: true
+        pattern: ['^\d+(\.\d+)+$', 'Nur Ziffern und Punkte, z. B. 2.16.840.1.113883.2.16.3.1.21.6.1']
+        hint: 'Vollständige OID unterhalb von 2.16.840.1.113883.2.16.3.1.21. Muss repo-weit eindeutig sein. Max. 255 Zeichen (empf. ≤ 64 für DICOM-Kompatibilität).'
+        default: '2.16.840.1.113883.2.16.3.1.21.3.1.x'
+      - name: category
+        label: 'Kategorie'
+        widget: select
+        required: true
+        default: codingscheme
+        hint: 'Offizieller EHSREG-Objekttyp (OID-Leitfaden Tabelle 3).'
+        options:
+          - identificationscheme
+          - organization
+          - person
+          - community
+          - codingscheme
+          - document
+          - alias
+          - template
+          - experimental
+      - *f_symbolicName
+      - *f_status
+      - *f_description
+      - *f_registrationAuthority
+      - *f_responsibleAuthority
+      - *f_creationDate
+      - *f_lastmodifiedDate
+      - *f_link_uri
+
+  - name: value-sets
+    label: '3.2.x · Code Schemes – ValueSets'
+    label_singular: 'OID-Eintrag'
+    description: 'FHIR ValueSets (.3.2.x)'
+    folder: oids/3-code-schemes/3-2-value-sets
+    create: true
+    format: json
+    extension: json
+    identifier_field: symbolicName
+    slug: '{{fields.symbolicName}}'
+    summary: '{{fields.dotNotation}} — {{fields.symbolicName}} [{{fields.status}}] · {{fields.responsibleAuthority.person_name}}'
+    sortable_fields:
+      fields: [dotNotation, symbolicName, status, creationDate]
+      default: {field: dotNotation, direction: ascending}
+    fields:
+      - name: dotNotation
+        label: 'OID (Dot Notation)'
+        widget: string
+        required: true
+        pattern: ['^\d+(\.\d+)+$', 'Nur Ziffern und Punkte, z. B. 2.16.840.1.113883.2.16.3.1.21.6.1']
+        hint: 'Vollständige OID unterhalb von 2.16.840.1.113883.2.16.3.1.21. Muss repo-weit eindeutig sein. Max. 255 Zeichen (empf. ≤ 64 für DICOM-Kompatibilität).'
+        default: '2.16.840.1.113883.2.16.3.1.21.3.2.x'
+      - name: category
+        label: 'Kategorie'
+        widget: select
+        required: true
+        default: codingscheme
+        hint: 'Offizieller EHSREG-Objekttyp (OID-Leitfaden Tabelle 3).'
+        options:
+          - identificationscheme
+          - organization
+          - person
+          - community
+          - codingscheme
+          - document
+          - alias
+          - template
+          - experimental
+      - *f_symbolicName
+      - *f_status
+      - *f_description
+      - *f_registrationAuthority
+      - *f_responsibleAuthority
+      - *f_creationDate
+      - *f_lastmodifiedDate
+      - *f_link_uri
+
+  - name: concept-maps
+    label: '3.3.x · Code Schemes – ConceptMaps'
+    label_singular: 'OID-Eintrag'
+    description: 'FHIR ConceptMaps (.3.3.x)'
+    folder: oids/3-code-schemes/3-3-concept-maps
+    create: true
+    format: json
+    extension: json
+    identifier_field: symbolicName
+    slug: '{{fields.symbolicName}}'
+    summary: '{{fields.dotNotation}} — {{fields.symbolicName}} [{{fields.status}}] · {{fields.responsibleAuthority.person_name}}'
+    sortable_fields:
+      fields: [dotNotation, symbolicName, status, creationDate]
+      default: {field: dotNotation, direction: ascending}
+    fields:
+      - name: dotNotation
+        label: 'OID (Dot Notation)'
+        widget: string
+        required: true
+        pattern: ['^\d+(\.\d+)+$', 'Nur Ziffern und Punkte, z. B. 2.16.840.1.113883.2.16.3.1.21.6.1']
+        hint: 'Vollständige OID unterhalb von 2.16.840.1.113883.2.16.3.1.21. Muss repo-weit eindeutig sein. Max. 255 Zeichen (empf. ≤ 64 für DICOM-Kompatibilität).'
+        default: '2.16.840.1.113883.2.16.3.1.21.3.3.x'
+      - name: category
+        label: 'Kategorie'
+        widget: select
+        required: true
+        default: codingscheme
+        hint: 'Offizieller EHSREG-Objekttyp (OID-Leitfaden Tabelle 3).'
+        options:
+          - identificationscheme
+          - organization
+          - person
+          - community
+          - codingscheme
+          - document
+          - alias
+          - template
+          - experimental
+      - *f_symbolicName
+      - *f_status
+      - *f_description
+      - *f_registrationAuthority
+      - *f_responsibleAuthority
+      - *f_creationDate
+      - *f_lastmodifiedDate
+      - *f_link_uri
+
+  - name: documents
+    label: '4.x · Documents'
+    label_singular: 'OID-Eintrag'
+    description: 'Dokumente/Richtlinien: Policies, Consent-Profile, Studienprotokolle, XDS-Klassen (.4.x)'
+    folder: oids/4-documents
+    create: true
+    format: json
+    extension: json
+    identifier_field: symbolicName
+    slug: '{{fields.symbolicName}}'
+    summary: '{{fields.dotNotation}} — {{fields.symbolicName}} [{{fields.status}}] · {{fields.responsibleAuthority.person_name}}'
+    sortable_fields:
+      fields: [dotNotation, symbolicName, status, creationDate]
+      default: {field: dotNotation, direction: ascending}
+    fields:
+      - name: dotNotation
+        label: 'OID (Dot Notation)'
+        widget: string
+        required: true
+        pattern: ['^\d+(\.\d+)+$', 'Nur Ziffern und Punkte, z. B. 2.16.840.1.113883.2.16.3.1.21.6.1']
+        hint: 'Vollständige OID unterhalb von 2.16.840.1.113883.2.16.3.1.21. Muss repo-weit eindeutig sein. Max. 255 Zeichen (empf. ≤ 64 für DICOM-Kompatibilität).'
+        default: '2.16.840.1.113883.2.16.3.1.21.4.x'
+      - name: category
+        label: 'Kategorie'
+        widget: select
+        required: true
+        default: document
+        hint: 'Offizieller EHSREG-Objekttyp (OID-Leitfaden Tabelle 3).'
+        options:
+          - identificationscheme
+          - organization
+          - person
+          - community
+          - codingscheme
+          - document
+          - alias
+          - template
+          - experimental
+      - *f_symbolicName
+      - *f_status
+      - *f_description
+      - *f_registrationAuthority
+      - *f_responsibleAuthority
+      - *f_creationDate
+      - *f_lastmodifiedDate
+      - *f_link_uri
+
+  - name: services
+    label: '5.x · Services'
+    label_singular: 'OID-Eintrag'
+    description: 'Services/APIs: eHealth-Services, FHIR-Server-Instanzen, Decision-Support-Services (.5.x)'
+    folder: oids/5-services
+    create: true
+    format: json
+    extension: json
+    identifier_field: symbolicName
+    slug: '{{fields.symbolicName}}'
+    summary: '{{fields.dotNotation}} — {{fields.symbolicName}} [{{fields.status}}] · {{fields.responsibleAuthority.person_name}}'
+    sortable_fields:
+      fields: [dotNotation, symbolicName, status, creationDate]
+      default: {field: dotNotation, direction: ascending}
+    fields:
+      - name: dotNotation
+        label: 'OID (Dot Notation)'
+        widget: string
+        required: true
+        pattern: ['^\d+(\.\d+)+$', 'Nur Ziffern und Punkte, z. B. 2.16.840.1.113883.2.16.3.1.21.6.1']
+        hint: 'Vollständige OID unterhalb von 2.16.840.1.113883.2.16.3.1.21. Muss repo-weit eindeutig sein. Max. 255 Zeichen (empf. ≤ 64 für DICOM-Kompatibilität).'
+        default: '2.16.840.1.113883.2.16.3.1.21.5.x'
+      - name: category
+        label: 'Kategorie'
+        widget: select
+        required: true
+        hint: 'Kein offizieller EHSREG-Typ für „Service" vorhanden – nächstliegenden Typ wählen (meist „document" oder „experimental").'
+        options:
+          - identificationscheme
+          - organization
+          - person
+          - community
+          - codingscheme
+          - document
+          - alias
+          - template
+          - experimental
+      - *f_symbolicName
+      - *f_status
+      - *f_description
+      - *f_registrationAuthority
+      - *f_responsibleAuthority
+      - *f_creationDate
+      - *f_lastmodifiedDate
+      - *f_link_uri
+
+  - name: templates
+    label: '6.x · Templates'
+    label_singular: 'OID-Eintrag'
+    description: 'Templates/Profiles: HL7 CDA Templates, FHIR StructureDefinition/Profile/IG (.6.x)'
+    folder: oids/6-templates
+    create: true
+    format: json
+    extension: json
+    identifier_field: symbolicName
+    slug: '{{fields.symbolicName}}'
+    summary: '{{fields.dotNotation}} — {{fields.symbolicName}} [{{fields.status}}] · {{fields.responsibleAuthority.person_name}}'
+    sortable_fields:
+      fields: [dotNotation, symbolicName, status, creationDate]
+      default: {field: dotNotation, direction: ascending}
+    fields:
+      - name: dotNotation
+        label: 'OID (Dot Notation)'
+        widget: string
+        required: true
+        pattern: ['^\d+(\.\d+)+$', 'Nur Ziffern und Punkte, z. B. 2.16.840.1.113883.2.16.3.1.21.6.1']
+        hint: 'Vollständige OID unterhalb von 2.16.840.1.113883.2.16.3.1.21. Muss repo-weit eindeutig sein. Max. 255 Zeichen (empf. ≤ 64 für DICOM-Kompatibilität).'
+        default: '2.16.840.1.113883.2.16.3.1.21.6.x'
+      - name: category
+        label: 'Kategorie'
+        widget: select
+        required: true
+        default: template
+        hint: 'Offizieller EHSREG-Objekttyp (OID-Leitfaden Tabelle 3).'
+        options:
+          - identificationscheme
+          - organization
+          - person
+          - community
+          - codingscheme
+          - document
+          - alias
+          - template
+          - experimental
+      - *f_symbolicName
+      - *f_status
+      - *f_description
+      - *f_registrationAuthority
+      - *f_responsibleAuthority
+      - *f_creationDate
+      - *f_lastmodifiedDate
+      - *f_link_uri
+
+  - name: system-artefacts
+    label: '7.x · System Artefacts'
+    label_singular: 'OID-Eintrag'
+    description: 'Softwaresysteme, Geräte, Sensor-Plattformen (.7.x)'
+    folder: oids/7-system-artefacts
+    create: true
+    format: json
+    extension: json
+    identifier_field: symbolicName
+    slug: '{{fields.symbolicName}}'
+    summary: '{{fields.dotNotation}} — {{fields.symbolicName}} [{{fields.status}}] · {{fields.responsibleAuthority.person_name}}'
+    sortable_fields:
+      fields: [dotNotation, symbolicName, status, creationDate]
+      default: {field: dotNotation, direction: ascending}
+    fields:
+      - name: dotNotation
+        label: 'OID (Dot Notation)'
+        widget: string
+        required: true
+        pattern: ['^\d+(\.\d+)+$', 'Nur Ziffern und Punkte, z. B. 2.16.840.1.113883.2.16.3.1.21.6.1']
+        hint: 'Vollständige OID unterhalb von 2.16.840.1.113883.2.16.3.1.21. Muss repo-weit eindeutig sein. Max. 255 Zeichen (empf. ≤ 64 für DICOM-Kompatibilität).'
+        default: '2.16.840.1.113883.2.16.3.1.21.7.x'
+      - name: category
+        label: 'Kategorie'
+        widget: select
+        required: true
+        hint: 'Kein offizieller EHSREG-Typ für „System-Artefakt" vorhanden – nächstliegenden Typ wählen (meist „document" oder „experimental").'
+        options:
+          - identificationscheme
+          - organization
+          - person
+          - community
+          - codingscheme
+          - document
+          - alias
+          - template
+          - experimental
+      - *f_symbolicName
+      - *f_status
+      - *f_description
+      - *f_registrationAuthority
+      - *f_responsibleAuthority
+      - *f_creationDate
+      - *f_lastmodifiedDate
+      - *f_link_uri
+
+  - name: research
+    label: '8.x · Research (JR-spezifisch)'
+    label_singular: 'OID-Eintrag'
+    description: 'Studien, Datensätze, KI-Modelle, Scoring-Methoden (.8.x). category = document oder experimental.'
+    folder: oids/8-research
+    create: true
+    format: json
+    extension: json
+    identifier_field: symbolicName
+    slug: '{{fields.symbolicName}}'
+    summary: '{{fields.dotNotation}} — {{fields.symbolicName}} [{{fields.status}}] · {{fields.responsibleAuthority.person_name}}'
+    sortable_fields:
+      fields: [dotNotation, symbolicName, status, creationDate]
+      default: {field: dotNotation, direction: ascending}
+    fields:
+      - name: dotNotation
+        label: 'OID (Dot Notation)'
+        widget: string
+        required: true
+        pattern: ['^\d+(\.\d+)+$', 'Nur Ziffern und Punkte, z. B. 2.16.840.1.113883.2.16.3.1.21.6.1']
+        hint: 'Vollständige OID unterhalb von 2.16.840.1.113883.2.16.3.1.21. Muss repo-weit eindeutig sein. Max. 255 Zeichen (empf. ≤ 64 für DICOM-Kompatibilität).'
+        default: '2.16.840.1.113883.2.16.3.1.21.8.x'
+      - name: category
+        label: 'Kategorie'
+        widget: select
+        required: true
+        hint: 'Kein offizieller EHSREG-Typ für „Research" vorhanden – „document" oder „experimental" wählen.'
+        options:
+          - identificationscheme
+          - organization
+          - person
+          - community
+          - codingscheme
+          - document
+          - alias
+          - template
+          - experimental
+      - *f_symbolicName
+      - *f_status
+      - *f_description
+      - *f_registrationAuthority
+      - *f_responsibleAuthority
+      - *f_creationDate
+      - *f_lastmodifiedDate
+      - *f_link_uri
+
+  - name: alias
+    label: '9.x · Alias'
+    label_singular: 'OID-Eintrag'
+    description: 'Kürzere Alias-OIDs für Fälle, in denen die reguläre OID die 64-Zeichen-Grenze (DICOM-Kompatibilität) überschreitet (.9.x). category = alias.'
+    folder: oids/9-alias
+    create: true
+    format: json
+    extension: json
+    identifier_field: symbolicName
+    slug: '{{fields.symbolicName}}'
+    summary: '{{fields.dotNotation}} — {{fields.symbolicName}} [{{fields.status}}] · {{fields.responsibleAuthority.person_name}}'
+    sortable_fields:
+      fields: [dotNotation, symbolicName, status, creationDate]
+      default: {field: dotNotation, direction: ascending}
+    fields:
+      - name: dotNotation
+        label: 'OID (Dot Notation)'
+        widget: string
+        required: true
+        pattern: ['^\d+(\.\d+)+$', 'Nur Ziffern und Punkte, z. B. 2.16.840.1.113883.2.16.3.1.21.6.1']
+        hint: 'Vollständige OID unterhalb von 2.16.840.1.113883.2.16.3.1.21. Muss repo-weit eindeutig sein. Max. 255 Zeichen (empf. ≤ 64 für DICOM-Kompatibilität).'
+        default: '2.16.840.1.113883.2.16.3.1.21.9.x'
+      - name: category
+        label: 'Kategorie'
+        widget: select
+        required: true
+        default: alias
+        hint: 'Offizieller EHSREG-Objekttyp (OID-Leitfaden Tabelle 3).'
+        options:
+          - identificationscheme
+          - organization
+          - person
+          - community
+          - codingscheme
+          - document
+          - alias
+          - template
+          - experimental
+      - *f_symbolicName
+      - *f_status
+      - *f_description
+      - *f_registrationAuthority
+      - *f_responsibleAuthority
+      - *f_creationDate
+      - *f_lastmodifiedDate
+      - *f_link_uri
+
+  - name: experimental
+    label: '99.x · Experimental'
+    label_singular: 'OID-Eintrag'
+    description: 'Pilotprojekte, Test-Namespaces – NICHT für Produktion (.99.x)'
+    folder: oids/99-experimental
+    create: true
+    format: json
+    extension: json
+    identifier_field: symbolicName
+    slug: '{{fields.symbolicName}}'
+    summary: '{{fields.dotNotation}} — {{fields.symbolicName}} [{{fields.status}}] · {{fields.responsibleAuthority.person_name}}'
+    sortable_fields:
+      fields: [dotNotation, symbolicName, status, creationDate]
+      default: {field: dotNotation, direction: ascending}
+    fields:
+      - name: dotNotation
+        label: 'OID (Dot Notation)'
+        widget: string
+        required: true
+        pattern: ['^\d+(\.\d+)+$', 'Nur Ziffern und Punkte, z. B. 2.16.840.1.113883.2.16.3.1.21.6.1']
+        hint: 'Vollständige OID unterhalb von 2.16.840.1.113883.2.16.3.1.21. Muss repo-weit eindeutig sein. Max. 255 Zeichen (empf. ≤ 64 für DICOM-Kompatibilität).'
+        default: '2.16.840.1.113883.2.16.3.1.21.99.x'
+      - name: category
+        label: 'Kategorie'
+        widget: select
+        required: true
+        default: experimental
+        hint: 'Offizieller EHSREG-Objekttyp (OID-Leitfaden Tabelle 3).'
+        options:
+          - identificationscheme
+          - organization
+          - person
+          - community
+          - codingscheme
+          - document
+          - alias
+          - template
+          - experimental
+      - *f_symbolicName
+      - *f_status
+      - *f_description
+      - *f_registrationAuthority
+      - *f_responsibleAuthority
+      - *f_creationDate
+      - *f_lastmodifiedDate
+      - *f_link_uri

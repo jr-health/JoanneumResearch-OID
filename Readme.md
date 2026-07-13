@@ -183,6 +183,7 @@ werden (siehe Kommentar oben in `.sveltia-cms/config.yml`).
       `symbolicName`/`dotNotation`, Schema-Validierung, DE+EN-Beschreibung,
       Prüfung ob `lastmodifiedDate` bei Änderungen aktualisiert wurde
 - [ ] Verantwortliche pro Zweig festlegen
+- [ ] Prozess wie neue OIDs angefordert, vergeben und veröffentlicht werden testen
 ### optional:
 - [ ] Eigene Domain `oid.joanneum.at` einrichten (DNS-CNAME + Pages-Custom-Domain + Homepage-/Callback-URLs der GitHub-OAuth-App anpassen)
 - [ ] Statische Übersichtsseite weiter verbessern

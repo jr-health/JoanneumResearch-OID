@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex" />
     <title>JR OID Registry – Verwaltung</title>
-    <!-- Konfiguration liegt (abweichend vom Default /admin/config.yml) unter .sveltia-cms/ -->
-    <link href="/.sveltia-cms/config.yml" type="text/yaml" rel="cms-config-url" />
+    <!-- Konfiguration liegt (abweichend vom Default /admin/config.yml) unter .sveltia-cms/.
+         Relativer Pfad, damit es sowohl unter einer Custom Domain (Root) als auch unter
+         der GitHub-Pages-Projekt-URL (.../<repo>/admin/) funktioniert. -->
+    <link href="../.sveltia-cms/config.yml" type="text/yaml" rel="cms-config-url" />
   </head>
   <body>
     <script src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js"></script>

@@ -175,10 +175,19 @@ werden (siehe Kommentar oben in `.sveltia-cms/config.yml`).
 - [x] JSON-Schema für OID-Einträge definieren (`schema/oid-entry.schema.json`)
 - [x] Sveltia CMS Konfiguration erstellen (`.sveltia-cms/config.yml`)
 - [x] Erste OID-Einträge anlegen: JR-Root-Knoten + PräNUDGE FHIR IG
-- [ ] CI-Validierungsscript implementieren (Gitea/Bamboo --> jetzt Github Actions?): Eindeutigkeit, Schema, DE+EN-Beschreibung
-- [ ] Öffentliche Publikation: statische Webseite unter https://oid.joanneum.at oder über GitHub actions
+- [x] Öffentliche Publikation über GitHub Actions + GitHub Pages (aktuell unter
+      `https://jr-health.github.io/JoanneumResearch-OID/`, inkl. `/admin/`)
+- [x] OAuth-Relay für Sveltia CMS eingerichtet (bestehender Cloudflare Worker
+      `sveltia-cms-auth` wiederverwendet) — Login + Speichern erfolgreich getestet
+- [ ] CI-Validierungsscript implementieren (GitHub Actions): Eindeutigkeit von
+      `symbolicName`/`dotNotation`, Schema-Validierung, DE+EN-Beschreibung,
+      Prüfung ob `lastmodifiedDate` bei Änderungen aktualisiert wurde
 - [ ] Verantwortliche pro Zweig festlegen
-
+### optional:
+- [ ] Eigene Domain `oid.joanneum.at` einrichten (DNS-CNAME + Pages-Custom-Domain + Homepage-/Callback-URLs der GitHub-OAuth-App anpassen)
+- [ ] Statische Übersichtsseite weiter verbessern
+- [ ] Entscheidung: Repository dauerhaft öffentlich lassen oder GitHub Pro/Team
+  für privates GitHub Pages
 ---
 
 ## Kontakt

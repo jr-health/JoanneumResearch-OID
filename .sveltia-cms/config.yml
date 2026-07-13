@@ -20,7 +20,7 @@ backend:
   name: github
   repo: jr-health/JoanneumResearch-OID
   branch: main
-  # base_url: https://<dein-oauth-relay>       # z. B. Cloudflare Worker
+  base_url: https://sveltia-cms-auth.jr-health.workers.dev
   # auth_endpoint: auth                          # Default; nur bei abweichendem Relay ändern
   commit_messages:
     create: 'OID: {{slug}} angelegt ({{collection}})'

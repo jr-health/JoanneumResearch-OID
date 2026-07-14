@@ -1,0 +1,25 @@
+{
+  "dotNotation": "2.16.840.1.113883.2.16.3.1.21.3.2.1",
+  "category": "codingscheme",
+  "symbolicName": "pn-glucose-context",
+  "status": "pending",
+  "description": [
+    {
+      "lang": "de",
+      "text": "PräNUDGE Glukose Kontext"
+    },
+    {
+      "lang": "en",
+      "text": "PreNUDGE Blood Glucose Meal Context"
+    }
+  ],
+  "registrationAuthority": "JOANNEUM RESEARCH Forschungsgesellschaft mbH",
+  "responsibleAuthority": {
+    "person_name": "Theresa Weitlaner",
+    "organization_name": "JOANNEUM RESEARCH Forschungsgesellschaft mbH",
+    "organization_telecom": "theresa.weitlaner@joanneum.at"
+  },
+  "creationDate": "2026-07-14",
+  "lastmodifiedDate": "2026-07-14",
+  "link_uri": "https://fhir.hl7.at/r4-JoanneumResearch-PreNUDGE-AppData-main/ValueSet-prenudge-bloodglucose-mealcontext.html"
+}

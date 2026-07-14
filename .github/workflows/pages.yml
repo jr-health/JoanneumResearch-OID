@@ -19,10 +19,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Validate OID entries
+        run: node scripts/validate-oids.js
 
       - name: Build static site from oids/**/*.json
         run: node scripts/build-site.js

@@ -3,23 +3,12 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { execSync } = require('node:child_process');
+const { ROOT, listOidFiles, relPath } = require('./lib/oids');
 
-const ROOT = path.join(__dirname, '..');
-const OIDS_DIR = path.join(ROOT, 'oids');
 const OUT_DIR = path.join(ROOT, '_site');
 
 const REPO_URL = 'https://github.com/jr-health/JoanneumResearch-OID';
 const REPO_BRANCH = 'main';
-
-function walk(dir) {
-  const out = [];
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) out.push(...walk(full));
-    else if (entry.name.endsWith('.json')) out.push(full);
-  }
-  return out;
-}
 
 function escapeHtml(str) {
   return String(str ?? '').replace(/[&<>"']/g, (c) => ({
@@ -44,10 +33,10 @@ const commitSha = getCommitSha();
 const shortSha = commitSha ? commitSha.slice(0, 7) : 'unknown';
 const buildTime = new Date().toISOString();
 
-const files = walk(OIDS_DIR);
+const files = listOidFiles();
 const entries = files.map((f) => {
   const data = JSON.parse(fs.readFileSync(f, 'utf8'));
-  data.__relPath = path.relative(ROOT, f).split(path.sep).join('/');
+  data.__relPath = relPath(f);
   return data;
 });
 entries.sort((a, b) => dotSortKey(a.dotNotation).localeCompare(dotSortKey(b.dotNotation)));

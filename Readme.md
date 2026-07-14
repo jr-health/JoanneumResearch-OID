@@ -18,7 +18,7 @@ Dieses Repository ist das interne OID-Registry für alle unter diesem Knoten ver
 Grundlage für Struktur und Governance ist der [EHSREG OID-Leitfaden v1.0.0](OID-Leitfaden_1-0-0.pdf).
 
 Die OIDs werden als **öffentlich zugängliche Webseite** unter
-**[https://oid.joanneum.at](https://oid.joanneum.at)** publiziert und sind dort von
+**[jr-health.github.io/JoanneumResearch-OID/](https://jr-health.github.io/JoanneumResearch-OID/)** publiziert und sind dort von
 Suchmaschinen indizierbar. Damit entfällt eine formale Meldung an EHSREG/HL7 Austria.
 
 ---

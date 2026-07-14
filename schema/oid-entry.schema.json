@@ -92,8 +92,8 @@
     },
     "lastmodifiedDate": {
       "type": "string",
-      "format": "date",
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+      "description": "Zeitstempel (inkl. Uhrzeit) der letzten Änderung, damit mehrere Änderungen am selben Tag unterscheidbar sind.",
+      "format": "date-time"
     },
     "link_uri": {
       "type": "string",

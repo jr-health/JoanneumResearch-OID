@@ -5,12 +5,13 @@
 //   4. description enthält Einträge für de und en
 //   5. status ist ein gültiger Wert
 //   (4. und 5. werden bereits vom JSON-Schema erzwungen, siehe dort)
-//   6. lastmodifiedDate wurde aktualisiert, wenn sich eine bereits vorhandene Datei geändert hat
+//
+// lastmodifiedDate wird NICHT mehr hier validiert, sondern automatisch von
+// scripts/fix-lastmodified.js korrigiert (siehe .github/workflows/auto-fix-lastmodified.yml).
 //
 // Aufruf: node scripts/validate-oids.js
 const fs = require('node:fs');
 const path = require('node:path');
-const { execSync } = require('node:child_process');
 const Ajv2020 = require('ajv/dist/2020');
 const addFormats = require('ajv-formats');
 const { ROOT, listOidFiles, relPath } = require('./lib/oids');
@@ -76,52 +77,6 @@ for (const { rel, data } of entries) {
     fail(rel, `dotNotation "${data.dotNotation}" bereits vergeben in ${byDotNotation.get(data.dotNotation)}`);
   } else {
     byDotNotation.set(data.dotNotation, rel);
-  }
-}
-
-// --- 6. lastmodifiedDate wurde bei Änderungen aktualisiert ------------------
-function resolveBaseRef() {
-  const eventPath = process.env.GITHUB_EVENT_PATH;
-  if (process.env.GITHUB_EVENT_NAME === 'pull_request' && eventPath) {
-    const event = loadJson(eventPath);
-    return event.pull_request?.base?.sha || null;
-  }
-  if (process.env.GITHUB_EVENT_NAME === 'push' && eventPath) {
-    const event = loadJson(eventPath);
-    if (event.before && !/^0+$/.test(event.before)) return event.before;
-    return null;
-  }
-  try {
-    execSync('git rev-parse HEAD~1', { cwd: ROOT, stdio: 'ignore' });
-    return 'HEAD~1';
-  } catch {
-    return null;
-  }
-}
-
-const baseRef = resolveBaseRef();
-if (!baseRef) {
-  console.log('Kein Vergleichs-Commit gefunden (z. B. erster Commit / neuer Branch) — lastmodifiedDate-Check übersprungen.');
-} else {
-  for (const { rel, data } of entries) {
-    let oldRaw;
-    try {
-      oldRaw = execSync(`git show ${baseRef}:${rel}`, { cwd: ROOT, stdio: ['ignore', 'pipe', 'ignore'] }).toString();
-    } catch {
-      continue; // Datei ist neu in diesem Commit/PR - kein Vergleich nötig
-    }
-
-    let oldData;
-    try {
-      oldData = JSON.parse(oldRaw);
-    } catch {
-      continue; // alte Version war kein gültiges JSON, nichts zu vergleichen
-    }
-
-    const changed = JSON.stringify(oldData) !== JSON.stringify(data);
-    if (changed && oldData.lastmodifiedDate === data.lastmodifiedDate) {
-      fail(rel, `Inhalt hat sich geändert, aber "lastmodifiedDate" (${data.lastmodifiedDate}) wurde nicht aktualisiert`);
-    }
   }
 }
 

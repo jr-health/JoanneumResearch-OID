@@ -1,0 +1,39 @@
+name: Auto-fix lastmodifiedDate
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    # Verhindert eine Endlosschleife: reagiert nicht auf den eigenen Auto-Fix-Commit.
+    if: github.event.head_commit.author.username != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - run: node scripts/fix-lastmodified.js
+
+      - name: Commit and push if changed
+        run: |
+          if git diff --quiet -- oids/; then
+            echo "Keine Korrektur nötig."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add oids/
+            git commit -m "chore: auto-update lastmodifiedDate"
+            git push
+          fi

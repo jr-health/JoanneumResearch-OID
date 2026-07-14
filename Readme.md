@@ -179,9 +179,10 @@ werden (siehe Kommentar oben in `.sveltia-cms/config.yml`).
       `https://jr-health.github.io/JoanneumResearch-OID/`, inkl. `/admin/`)
 - [x] OAuth-Relay für Sveltia CMS eingerichtet (bestehender Cloudflare Worker
       `sveltia-cms-auth` wiederverwendet) — Login + Speichern erfolgreich getestet
-- [ ] CI-Validierungsscript implementieren (GitHub Actions): Eindeutigkeit von
-      `symbolicName`/`dotNotation`, Schema-Validierung, DE+EN-Beschreibung,
-      Prüfung ob `lastmodifiedDate` bei Änderungen aktualisiert wurde
+- [x] CI-Validierungsscript implementieren (GitHub Actions): Eindeutigkeit von
+      `symbolicName`/`dotNotation`, Schema-Validierung, DE+EN-Beschreibung
+- [x] `lastmodifiedDate` wird automatisch per CI korrigiert, falls sich der
+      Inhalt einer OID geändert hat (statt manuell im CMS gepflegt zu werden)
 - [ ] Verantwortliche pro Zweig festlegen
 - [ ] Prozess wie neue OIDs angefordert, vergeben und veröffentlicht werden testen
 ### optional:

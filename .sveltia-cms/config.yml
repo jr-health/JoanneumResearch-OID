@@ -152,11 +152,11 @@ collections:
         label: 'Letzte Änderung'
         widget: datetime
         required: true
-        format: 'YYYY-MM-DD'
+        format: 'YYYY-MM-DDTHH:mm:ssZ'
         date_format: 'YYYY-MM-DD'
-        time_format: false
+        time_format: 'HH:mm'
         picker_utc: true
-        hint: 'Bei jeder Änderung aktualisieren.'
+        hint: 'Wird nach dem Speichern automatisch per CI korrigiert, falls sich sonstiger Inhalt geändert hat — muss nicht manuell gepflegt werden (außer bei der Ersterstellung).'
       - &f_link_uri
         name: link_uri
         label: 'Link / URI'

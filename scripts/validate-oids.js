@@ -6,8 +6,11 @@
 //   5. status ist ein gültiger Wert
 //   (4. und 5. werden bereits vom JSON-Schema erzwungen, siehe dort)
 //
-// lastmodifiedDate wird NICHT mehr hier validiert, sondern automatisch von
-// scripts/fix-lastmodified.js korrigiert (siehe .github/workflows/auto-fix-lastmodified.yml).
+// lastmodifiedDate wird nicht mehr auf "wurde bei Änderungen aktualisiert"
+// geprüft, sondern automatisch von scripts/fix-lastmodified.js korrigiert
+// (siehe .github/workflows/auto-fix-lastmodified.yml). Manuelle Werte sind
+// weiterhin möglich (z. B. um historische Zeitstempel zu korrigieren) - hier
+// wird nur noch geprüft, ob so ein manueller Wert überhaupt plausibel ist.
 //
 // Aufruf: node scripts/validate-oids.js
 const fs = require('node:fs');
@@ -77,6 +80,20 @@ for (const { rel, data } of entries) {
     fail(rel, `dotNotation "${data.dotNotation}" bereits vergeben in ${byDotNotation.get(data.dotNotation)}`);
   } else {
     byDotNotation.set(data.dotNotation, rel);
+  }
+}
+
+// --- 4. lastmodifiedDate plausibel (nicht in der Zukunft, nicht vor creationDate) ---
+const FUTURE_TOLERANCE_MS = 5 * 60 * 1000; // Toleranz für Clock-Skew zwischen CMS/Client und CI-Runner
+const now = Date.now();
+for (const { rel, data } of entries) {
+  const lastModified = new Date(data.lastmodifiedDate).getTime();
+  const created = new Date(data.creationDate).getTime();
+
+  if (lastModified > now + FUTURE_TOLERANCE_MS) {
+    fail(rel, `lastmodifiedDate (${data.lastmodifiedDate}) liegt in der Zukunft`);
+  } else if (lastModified < created) {
+    fail(rel, `lastmodifiedDate (${data.lastmodifiedDate}) liegt vor creationDate (${data.creationDate})`);
   }
 }
 

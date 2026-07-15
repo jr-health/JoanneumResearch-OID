@@ -1,0 +1,25 @@
+{
+  "dotNotation": "2.16.840.1.113883.2.16.3.1.21.3.2.6",
+  "category": "codingscheme",
+  "symbolicName": "pn-whoqol-bref-score-type",
+  "status": "pending",
+  "description": [
+    {
+      "lang": "de",
+      "text": "PräNUDGE WHOQOL-BREF Score Typ ValueSet"
+    },
+    {
+      "lang": "en",
+      "text": "PreNUDGE WHOQOL-BREF Score Type ValueSet"
+    }
+  ],
+  "registrationAuthority": "JOANNEUM RESEARCH Forschungsgesellschaft mbH",
+  "responsibleAuthority": {
+    "person_name": "Theresa Weitlaner",
+    "organization_name": "JOANNEUM RESEARCH Forschungsgesellschaft mbH",
+    "organization_telecom": "theresa.weitlaner@joanneum.at"
+  },
+  "creationDate": "2026-07-15",
+  "lastmodifiedDate": "2026-07-15T12:08:00+00:00",
+  "link_uri": "https://fhir.hl7.at/r4-JoanneumResearch-PreNUDGE-AppData-main/ValueSet-prenudge-whoqol-bref-score-type.html"
+}

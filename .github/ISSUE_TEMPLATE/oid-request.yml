@@ -1,0 +1,98 @@
+name: OID-Anfrage
+description: Neue OID unter 2.16.840.1.113883.2.16.3.1.21 anfordern
+title: "[OID-Anfrage] "
+labels: ["oid-request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Danke für deine Anfrage! Ein/e OID-Verantwortliche/r bei JOANNEUM RESEARCH
+        prüft Eindeutigkeit und Zweig-Zuordnung und legt den Eintrag anschließend an.
+
+        Falls du die JSON-Datei stattdessen selbst vorbereiten möchtest, kannst du
+        auch direkt einen Pull Request stellen (siehe `schema/oid-entry.schema.json`
+        und README, Abschnitt "Governance").
+
+  - type: dropdown
+    id: branch
+    attributes:
+      label: Zweig / Kategorie
+      options:
+        - "1.x instance-identifier – Instanz-Identifier-Namespaces"
+        - "2.x identification-mechanism – Identifikationsmechanismen"
+        - "3.1.x code-systems – FHIR CodeSystems"
+        - "3.2.x value-sets – FHIR ValueSets"
+        - "3.3.x concept-maps – FHIR ConceptMaps"
+        - "4.x documents – Policies, Consent-Profile, Studienprotokolle"
+        - "5.x services – eHealth-Services, FHIR-Server-Instanzen, APIs"
+        - "6.x templates – FHIR StructureDefinitions, Profile, Implementation Guides"
+        - "7.x system-artefacts – Softwaresysteme, Geräte, Sensor-Plattformen"
+        - "8.x research – Studien, Datensätze, KI-Modelle, Scoring-Methoden"
+        - "9.x alias – Alias-OID für DICOM-Kompatibilität"
+        - "99.x experimental – Pilotprojekt/Test (nicht für Produktion)"
+    validations:
+      required: true
+
+  - type: input
+    id: symbolic-name
+    attributes:
+      label: Vorschlag für symbolicName
+      description: Kleinbuchstaben/Ziffern/Bindestriche, beginnt mit Buchstabe, max. 25 Zeichen, keine führenden/abschließenden/doppelten Bindestriche.
+      placeholder: z. B. prenudge-appdata-r4
+    validations:
+      required: true
+
+  - type: textarea
+    id: description-de
+    attributes:
+      label: Beschreibung (Deutsch)
+      description: Wofür wird diese OID verwendet?
+    validations:
+      required: true
+
+  - type: textarea
+    id: description-en
+    attributes:
+      label: Description (English)
+    validations:
+      required: true
+
+  - type: input
+    id: responsible-person
+    attributes:
+      label: Verantwortliche Person
+    validations:
+      required: true
+
+  - type: input
+    id: organization
+    attributes:
+      label: Organisation
+      placeholder: JOANNEUM RESEARCH Forschungsgesellschaft mbH
+    validations:
+      required: true
+
+  - type: input
+    id: contact-email
+    attributes:
+      label: Kontakt-E-Mail
+    validations:
+      required: true
+
+  - type: input
+    id: link-uri
+    attributes:
+      label: Link / URI (optional)
+      description: z. B. Studienseite, IG-Repo, Dokumentation
+    validations:
+      required: false
+
+  - type: dropdown
+    id: requester-type
+    attributes:
+      label: Anfragende Stelle
+      options:
+        - "JOANNEUM RESEARCH (intern)"
+        - "Externe Organisation / Partner"
+    validations:
+      required: true

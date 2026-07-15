@@ -106,20 +106,20 @@ Pflicht-Metadaten gemäß OID-Leitfaden Kap. 5.4: `dotNotation`, `symbolicName`,
 Da das Repository öffentlich ist, kann grundsätzlich jede:r ein Issue öffnen oder
 per Fork einen Pull Request stellen. Da JR die Registrierungsbefugnis laut
 OID-Leitfaden (Kap. 4.6.3) nicht weiterdelegieren darf, bleibt die tatsächliche
-Vergabe (Commit auf `main` bzw. CMS-Zugriff) aber immer JR-Mitarbeiter:innen
+Vergabe (Commit auf `main` bzw. CMS-Zugriff) aber immer dem JR-Team
 mit Schreibrechten vorbehalten. Zwei Wege, eine OID anzufordern:
 
 **Weg A — Anfrage per Issue** (Standardfall, für alle offen)
 1. **Antrag**: [OID-Anfrage-Issue](https://github.com/jr-health/JoanneumResearch-OID/issues/new?template=oid-request.yml) öffnen
    (gewünschter Zweig, Zweck DE+EN, `symbolicName`-Vorschlag, verantwortliche Person).
 2. **Prüfung**: OID-Verantwortliche/r prüft Eindeutigkeit und korrekte Zweig-Zuordnung.
-3. **Vergabe**: JR-Mitarbeiter:in legt den Eintrag über das CMS an, CI-Check grün → OID ist aktiv.
+3. **Vergabe**: JR-Team legt den Eintrag über das CMS an, CI-Check grün → OID ist aktiv.
 4. Issue wird mit Link zum fertigen Eintrag geschlossen.
 
 **Weg B — Direkter Pull Request** (optional, z. B. für technisch versierte/externe Partner)
 1. Repo forken, JSON-Datei gemäß `schema/oid-entry.schema.json` selbst anlegen, PR öffnen.
 2. CI (`validate.yml`) prüft automatisch auch PRs von Forks (Schema, Eindeutigkeit, Plausibilität).
-3. JR-Mitarbeiter:in reviewt inhaltlich (Zweig-Zuordnung, Verantwortlichkeit) und mergt.
+3. JR-Team reviewt inhaltlich (Zweig-Zuordnung, Verantwortlichkeit) und mergt.
 
 **Keine Rücknahme**: Einmal vergebene OIDs bleiben dauerhaft gültig. Status kann
 auf `retired` gesetzt werden, die OID selbst bleibt im Repository.
@@ -170,9 +170,7 @@ Browsers direkt:
    auswählen.
 
 **Wichtig:** Der lokale Modus macht **keine Git-Operationen** — Commit und
-Push müssen weiterhin manuell per Git erfolgen. Für den Produktivbetrieb
-gegen das echte GitHub-Backend muss zusätzlich das OAuth-Relay eingerichtet
-werden (siehe Kommentar oben in `.sveltia-cms/config.yml`).
+Push müssen weiterhin manuell per Git erfolgen.
 
 ---
 
@@ -200,9 +198,8 @@ werden (siehe Kommentar oben in `.sveltia-cms/config.yml`).
 - [x] `lastmodifiedDate` wird automatisch per CI korrigiert, falls sich der
       Inhalt einer OID geändert hat (statt manuell im CMS gepflegt zu werden)
 - [ ] Verantwortliche pro Zweig festlegen
-- [x] Prozess wie neue OIDs angefordert, vergeben und veröffentlicht werden definiert
-      (Issue-Template `.github/ISSUE_TEMPLATE/oid-request.yml` + Governance-Abschnitt) —
-      noch nicht live mit einer echten Anfrage getestet
+- [ ] Prozess wie neue OIDs angefordert, vergeben und veröffentlicht werden definiert
+      (Issue-Template `.github/ISSUE_TEMPLATE/oid-request.yml` testen
 ### optional:
 - [ ] Eigene Domain `oid.joanneum.at` einrichten (DNS-CNAME + Pages-Custom-Domain + Homepage-/Callback-URLs der GitHub-OAuth-App anpassen)
 - [ ] Statische Übersichtsseite weiter verbessern

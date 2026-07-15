@@ -1,0 +1,25 @@
+{
+  "dotNotation": "2.16.840.1.113883.2.16.3.1.21.3.2.4",
+  "category": "codingscheme",
+  "symbolicName": "pn-other-obs-codes",
+  "status": "pending",
+  "description": [
+    {
+      "lang": "de",
+      "text": "PräNUDGE Andere Observations Codes"
+    },
+    {
+      "lang": "en",
+      "text": "PreNUDGE Other Observations Codes"
+    }
+  ],
+  "registrationAuthority": "JOANNEUM RESEARCH Forschungsgesellschaft mbH",
+  "responsibleAuthority": {
+    "person_name": "Theresa Weitlaner",
+    "organization_name": "JOANNEUM RESEARCH Forschungsgesellschaft mbH",
+    "organization_telecom": "theresa.weitlaner@joanneum.at"
+  },
+  "creationDate": "2026-07-15",
+  "lastmodifiedDate": "2026-07-15T11:58:00+00:00",
+  "link_uri": "https://fhir.hl7.at/r4-JoanneumResearch-PreNUDGE-AppData-main/ValueSet-prenudge-other-observations-codes.html"
+}

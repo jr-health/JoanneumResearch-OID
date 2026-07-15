@@ -20,6 +20,15 @@ function dotSortKey(dot) {
   return dot.split('.').map((n) => n.padStart(6, '0')).join('.');
 }
 
+// Zeigt lastmodifiedDate lesbar an ("YYYY-MM-DD HH:mm", UTC), statt der
+// vollen ISO-Zeichenkette mit Sekunden/Offset. Rohwert bleibt im JSON-LD.
+function formatDateTime(iso) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso ?? '';
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
+}
+
 function getCommitSha() {
   if (process.env.GITHUB_SHA) return process.env.GITHUB_SHA;
   try {
@@ -57,7 +66,7 @@ const rows = entries.map((e) => {
     <td><span class="status status-${escapeHtml(e.status)}">${escapeHtml(e.status)}</span></td>
     <td>${escapeHtml(de)}</td>
     <td>${escapeHtml(responsible)}</td>
-    <td>${escapeHtml(e.lastmodifiedDate)}</td>
+    <td>${escapeHtml(formatDateTime(e.lastmodifiedDate))}</td>
     <td>${link}</td>
     <td><a href="${jsonUrl}" target="_blank" rel="noopener">JSON</a> · <a href="${historyUrl}" target="_blank" rel="noopener">Verlauf</a></td>
   </tr>`;

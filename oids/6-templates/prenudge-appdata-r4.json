@@ -1,8 +1,8 @@
 {
   "dotNotation": "2.16.840.1.113883.2.16.3.1.21.6.1",
-  "symbolicName": "prenudge-appdata-r4",
   "category": "template",
-  "status": "pending",
+  "symbolicName": "prenudge-appdata-r4",
+  "status": "active",
   "description": [
     {
       "lang": "de",

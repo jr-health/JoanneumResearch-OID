@@ -6,9 +6,11 @@ const { execSync } = require('node:child_process');
 const { ROOT, listOidFiles, relPath } = require('./lib/oids');
 
 const OUT_DIR = path.join(ROOT, '_site');
+const ASSETS_DIR = path.join(ROOT, 'assets');
 
 const REPO_URL = 'https://github.com/jr-health/JoanneumResearch-OID';
 const REPO_BRANCH = 'main';
+const RESEARCH_GROUP_URL = 'https://www.joanneum.at/health/en/research-groups/digital-healthcare-solutions/';
 
 function escapeHtml(str) {
   return String(str ?? '').replace(/[&<>"']/g, (c) => ({
@@ -100,6 +102,9 @@ const html = `<!doctype html>
 <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
 <style>
   body { font-family: system-ui, sans-serif; margin: 2rem; color: #1a1a1a; }
+  .site-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem; }
+  .site-header img { height: 64px; width: auto; display: block; }
+  .site-header h1 { margin: 0; }
   h1 { font-size: 1.4rem; }
   table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
   th, td { border: 1px solid #ddd; padding: 0.4rem 0.6rem; text-align: left; vertical-align: top; }
@@ -117,7 +122,12 @@ const html = `<!doctype html>
 </style>
 </head>
 <body>
-<h1>JOANNEUM RESEARCH OID Registry</h1>
+<header class="site-header">
+  <a href="${RESEARCH_GROUP_URL}" target="_blank" rel="noopener" title="JOANNEUM RESEARCH – Digital Healthcare Solutions">
+    <img src="assets/JOANNEUM-RESEARCH-allgemein-logo-rgb.png" alt="JOANNEUM RESEARCH Logo">
+  </a>
+  <h1>JOANNEUM RESEARCH OID Registry</h1>
+</header>
 <p>Root-OID: <code>2.16.840.1.113883.2.16.3.1.21</code> — ${entries.length} Einträge</p>
 <table>
 <thead>
@@ -132,7 +142,8 @@ ${rows}
      Build: ${buildTime} · Commit: <a href="${REPO_URL}/commit/${commitSha || ''}" target="_blank" rel="noopener"><code>${escapeHtml(shortSha)}</code></a></p>
   <p><a href="${REPO_URL}" target="_blank" rel="noopener">Repository</a> ·
      <a href="${REPO_URL}/commits/${REPO_BRANCH}" target="_blank" rel="noopener">Änderungshistorie</a> ·
-     <a href="admin/">CMS-Verwaltung</a></p>
+     <a href="admin/">CMS-Verwaltung</a> ·
+     <a href="${RESEARCH_GROUP_URL}" target="_blank" rel="noopener">Digital Healthcare Solutions (Forschungsgruppe)</a></p>
 </footer>
 </body>
 </html>
@@ -140,4 +151,7 @@ ${rows}
 
 fs.mkdirSync(OUT_DIR, { recursive: true });
 fs.writeFileSync(path.join(OUT_DIR, 'index.html'), html, 'utf8');
+if (fs.existsSync(ASSETS_DIR)) {
+  fs.cpSync(ASSETS_DIR, path.join(OUT_DIR, 'assets'), { recursive: true });
+}
 console.log(`Built ${entries.length} entries (commit ${shortSha}) -> ${path.join(OUT_DIR, 'index.html')}`);

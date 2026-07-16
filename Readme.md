@@ -44,31 +44,24 @@ Suchmaschinen indizierbar. Damit entfällt eine formale Meldung an EHSREG/HL7 Au
 
 ---
 
-## Geplante Repository-Struktur
+## Struktur des oids-Ordners
 
 ```
-JoanneumResearch-OID/
-  oids/
-    0-organization/
-      joanneum-research.json
-    1-instance-identifier/
-    2-identification-mechanism/
-    3-code-schemes/
-      3-1-code-systems/
-      3-2-value-sets/
-      3-3-concept-maps/
-    4-documents/
-    5-services/
-    6-templates/
-      prenudge-appdata-r4.json
-    7-system-artefacts/
-    8-research/
-    9-alias/
-    99-experimental/
-  schema/
-    oid-entry.schema.json
-  .sveltia-cms/
-    config.yml
+oids/
+  0-organization/
+  1-instance-identifier/
+  2-identification-mechanism/
+  3-code-schemes/
+    3-1-code-systems/
+    3-2-value-sets/
+    3-3-concept-maps/
+  4-documents/
+  5-services/
+  6-templates/
+  7-system-artefacts/
+  8-research/
+  9-alias/
+  99-experimental/
 ```
 
 Jede OID wird als eine JSON-Datei erfasst. Beispiel (`oids/6-templates/prenudge-appdata-r4.json`):
